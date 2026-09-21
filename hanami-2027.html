@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hanami 2027 · Il fronte dei ciliegi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FAF7F8; --panel:#FFFFFF; --ink:#232A3B; --muted:#6A6E7E; --line:#E7DEE3;
+  --bud:#D9CCD1; --open:#F4C3D1; --peak:#D23C6B; --fall:#C9B3D9; --leaf:#8FA77F; --band:rgba(210,60,107,.07);
+  --serif:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",Georgia,serif;
+  --sans:"Zen Kaku Gothic New","Hiragino Sans","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121625; --panel:#1A2033; --ink:#EDE6EC; --muted:#A3A5B6; --line:#2C3350;
+  --bud:#3A4160; --open:#8C4E68; --peak:#FF6F9C; --fall:#7B6A9C; --leaf:#5F7A57; --band:rgba(255,111,156,.09);}}
+:root[data-theme="dark"]{--bg:#121625; --panel:#1A2033; --ink:#EDE6EC; --muted:#A3A5B6; --line:#2C3350;
+  --bud:#3A4160; --open:#8C4E68; --peak:#FF6F9C; --fall:#7B6A9C; --leaf:#5F7A57; --band:rgba(255,111,156,.09);}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--peak)}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+header.top{padding:40px 0 8px}
+h1{font-family:var(--serif);font-weight:800;font-size:clamp(30px,5vw,52px);line-height:1.1;margin:0 0 10px;letter-spacing:.01em}
+.lede{max-width:66ch;color:var(--muted);margin:0}
+h2{font-family:var(--serif);font-weight:700;font-size:clamp(24px,3vw,32px);margin:0 0 6px;line-height:1.2}
+.sub{color:var(--muted);max-width:70ch;margin:0 0 18px}
+section{padding:44px 0;border-top:1px solid var(--line)}
+section:first-of-type{border-top:0}
+.controls{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;margin:18px 0}
+label.ctl{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted)}
+select{font:inherit;font-size:15px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:220px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;background:var(--panel)}
+.seg button{font:inherit;font-size:14px;border:0;background:transparent;color:var(--muted);padding:7px 14px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--peak);outline-offset:2px}
+
+/* hero */
+.hero{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:28px;align-items:start}
+.daybig{font-family:var(--serif);font-weight:800;font-size:clamp(56px,9vw,112px);line-height:.95;margin:0}
+.daybig small{display:block;font-family:var(--sans);font-weight:500;font-size:15px;color:var(--muted);margin-top:10px;letter-spacing:0}
+.slider{margin:18px 0 6px}
+input[type=range]{width:100%;accent-color:var(--peak)}
+.ticks{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.mapbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:10px}
+.mapbox svg{width:100%;height:auto;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted);margin-top:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:50%;display:inline-block}
+.rank{list-style:none;margin:16px 0 0;padding:0}
+.rank li{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.rank li:hover .nm{color:var(--peak)}
+.rank .nm{font-weight:500}
+.rank .rg{font-size:12.5px;color:var(--muted)}
+.rank .pc{font-family:var(--serif);font-weight:700;font-size:20px;text-align:right;grid-row:span 2;align-self:center}
+.bar{height:4px;background:var(--line);border-radius:2px;grid-column:1/-1;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--peak)}
+.est{font-size:11.5px;color:var(--muted);border:1px solid var(--line);border-radius:4px;padding:0 5px;margin-left:6px;white-space:nowrap}
+
+/* gantt + heat */
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.gantt svg,.heat table{display:block}
+.heat table{border-collapse:collapse;font-size:12.5px;min-width:760px;width:100%}
+.heat th,.heat td{padding:0;text-align:center}
+.heat thead th{position:sticky;top:0;background:var(--panel);font-weight:500;color:var(--muted);padding:8px 2px;font-size:12px}
+.heat tbody th{text-align:left;font-weight:500;padding:4px 10px;white-space:nowrap;position:sticky;left:0;background:var(--panel);cursor:pointer;max-width:260px;overflow:hidden;text-overflow:ellipsis}
+.heat td{width:44px;height:28px;font-variant-numeric:tabular-nums;border:2px solid var(--panel);border-radius:6px}
+.heat tr.grp th{font-family:var(--serif);font-size:15px;padding-top:14px;color:var(--ink);cursor:default}
+
+/* detail */
+.detail{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:28px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;margin:12px 0}
+.stats div b{display:block;font-family:var(--serif);font-size:24px;font-weight:700}
+.stats div span{font-size:13px;color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tag{font-size:12.5px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--muted)}
+.prose{max-width:70ch}
+.prose p{margin:0 0 14px}
+.insights{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.insights .card h3{font-family:var(--serif);font-size:19px;margin:0 0 6px;line-height:1.3}
+.insights .card p{margin:0;color:var(--muted);font-size:15px}
+.howto{margin:18px 0 0;max-width:70ch;padding:14px 16px;border-left:3px solid var(--peak);background:var(--panel);border-radius:0 10px 10px 0}
+.howto p{margin:0;font-size:15px}
+.toc{position:sticky;top:0;z-index:5;background:var(--bg);display:flex;gap:6px;overflow-x:auto;padding:12px 0;margin:10px 0 0;border-bottom:1px solid var(--line)}
+.toc a{flex:none;text-decoration:none;color:var(--ink);font-size:15px;padding:8px 14px;border:1px solid var(--line);border-radius:999px;background:var(--panel)}
+.toc a:hover{border-color:var(--peak);color:var(--peak)}
+.days{display:grid;gap:10px}
+.dayrow{display:grid;grid-template-columns:120px minmax(0,1fr);gap:16px;padding:14px 16px;background:var(--panel);border:1px solid var(--line);border-radius:12px;align-items:start}
+.dayrow .dd{font-family:var(--serif);font-weight:700;font-size:22px;line-height:1.1}
+.dayrow .dd small{display:block;font-family:var(--sans);font-weight:400;font-size:13px;color:var(--muted);margin-top:4px}
+.blk{display:inline-block;font-size:13px;font-weight:700;padding:2px 10px;border-radius:999px;margin-bottom:6px}
+.blk.fix{background:var(--ink);color:var(--bg)}.blk.free{border:1px dashed var(--muted);color:var(--muted)}
+.meters{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px 18px}
+.meter{font-size:14px}.meter b{font-weight:700}
+.meter .mb{height:8px;border-radius:4px;background:var(--line);margin-top:4px;overflow:hidden;display:flex}
+.meter .mb i{display:block;height:100%}
+.rank li{min-height:48px}
+select,.seg button{min-height:44px}
+@media (max-width:600px){.dayrow{grid-template-columns:1fr;gap:6px}body{font-size:17px}}
+.routes{margin:6px 0 16px;flex-wrap:wrap;border-radius:14px}
+.routes button{padding:10px 16px}
+.rsum{margin-bottom:14px}
+.rsum h3{font-family:var(--serif);font-size:22px;margin:0 0 6px}
+.rsum .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 24px;margin-top:10px;font-size:15px}
+.rsum .cols b{display:block;font-size:13px;color:var(--muted);font-weight:500;margin-bottom:2px}
+.yrs{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.yrs span{width:44px;text-align:center;font-size:11px;border-radius:6px;padding:4px 0;line-height:1.2}
+.yrs span b{display:block;font-size:15px;color:inherit;margin:0;font-family:var(--serif)}
+.act{margin:2px 0 10px;font-size:15px}
+.act .k{display:inline-block;font-size:12px;border-radius:4px;padding:0 6px;margin-right:4px;border:1px solid var(--line);color:var(--muted)}
+input[type=search]{font:inherit;font-size:16px;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:240px;min-height:44px}
+table.look{border-collapse:collapse;width:100%;min-width:820px;font-size:15px}
+.look th{text-align:left;font-weight:500;font-size:13px;color:var(--muted);padding:12px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+.look td{padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:top;white-space:nowrap}
+.look tbody tr{cursor:pointer}.look tbody tr:hover td{background:var(--band)}
+.look td.nm{white-space:normal;font-weight:500;min-width:220px}
+.look td.best b{color:var(--peak)}
+.look .mini{display:block;font-size:12.5px;color:var(--muted);font-weight:400}
+.pill{display:inline-block;min-width:54px;text-align:center;border-radius:999px;padding:2px 10px;font-size:13.5px}
+footer{padding:30px 0 60px;color:var(--muted);font-size:13.5px;border-top:1px solid var(--line)}
+@media (max-width:860px){.hero,.detail{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.dot{transition:fill .25s, r .25s}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>Il fronte dei ciliegi, dal 29 marzo all'11 aprile</h1>
+  <p class="lede">Sedici stagioni di osservazioni ufficiali (2011–2026) su 41 città e 24 luoghi di hanami, lette dentro la finestra del tuo viaggio. Scegli un giorno e guarda dove, storicamente, la fioritura è al suo meglio.</p>
+  <div class="howto"><p><b>Come si legge.</b> Le percentuali dicono in quanti anni, su quelli considerati, un luogo era al massimo della fioritura in quel giorno. "Fiorito" invece vuol dire che c'erano fiori da vedere, anche se non al picco. Tocca qualsiasi luogo per aprirne la scheda.</p></div>
+</header>
+<nav class="toc" aria-label="Sezioni"><a href="#periodi">Periodi</a><a href="#fronte">Giorno per giorno</a><a href="#calendario">Calendario</a><a href="#probabilita">Tabella</a><a href="#scheda">Schede</a><a href="#lettura">Conclusioni</a><a href="#viaggio">Bozze di viaggio</a><a href="#metodo">Fonti</a></nav>
+
+
+
+<section id="periodi">
+  <h2>Periodi di fioritura</h2>
+  <p class="sub">Tutti i luoghi in un colpo d'occhio. Le date sono le medie degli ultimi 10 anni; il "periodo migliore" va da 2 giorni prima a 4 giorni dopo la piena fioritura media. Tocca una riga per aprire la scheda completa.</p>
+  <div class="controls">
+    <label class="ctl">Cerca<input id="q" type="search" placeholder="Kyoto, Yoshino, castello..." autocomplete="off"></label>
+    <label class="ctl">Regione<select id="lreg"><option value="">Tutte le regioni</option></select></label>
+    <label class="ctl">Mostra<select id="lwin"><option value="">Tutti</option><option value="in">Solo con picco nel viaggio</option></select></label>
+  </div>
+  <div class="scroll"><table class="look" id="look"></table></div>
+</section>
+<section id="fronte">
+  <div class="controls">
+    <label class="ctl">Scenario
+      <select id="scen"></select>
+    </label>
+    <div class="seg" role="group" aria-label="Cosa mostrare">
+      <button data-k="all" aria-pressed="true">Tutto</button>
+      <button data-k="citta" aria-pressed="false">Città JMA</button>
+      <button data-k="luogo" aria-pressed="false">Luoghi</button>
+    </div>
+    <div class="seg" role="group" aria-label="Tema">
+      <button data-t="auto" aria-pressed="true">Auto</button>
+      <button data-t="light" aria-pressed="false">Giorno</button>
+      <button data-t="dark" aria-pressed="false">Yozakura</button>
+    </div>
+  </div>
+  <div class="hero">
+    <div>
+      <p class="daybig" id="daybig"></p>
+      <div class="slider">
+        <input type="range" id="day" min="29" max="42" value="33" aria-label="Giorno del viaggio">
+        <div class="ticks"><span>29 mar, arrivo</span><span>4 apr</span><span>11 apr, rientro</span></div>
+      </div>
+      <div class="mapbox"><svg id="map" viewBox="0 0 520 560" role="img" aria-label="Mappa del Giappone con lo stato della fioritura"></svg></div>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div>
+      <h2 id="rankTitle">Dove andare quel giorno</h2>
+      <p class="sub" id="rankSub"></p>
+      <ul class="rank" id="rank"></ul>
+    </div>
+  </div>
+</section>
+
+<section id="calendario">
+  <h2>Calendario del fronte</h2>
+  <p class="sub" id="ganttSub">Ogni riga è un luogo, ordinato per data media di piena fioritura. La fascia rosa è il tuo viaggio.</p>
+  <div class="scroll gantt"><svg id="gantt"></svg></div>
+  <div class="legend" id="legend2"></div>
+</section>
+
+<section id="probabilita">
+  <h2>Probabilità di piena fioritura, giorno per giorno</h2>
+  <p class="sub">Percentuale di anni in cui quel luogo era in piena fioritura (da 2 giorni prima a 4 giorni dopo il "mankai" ufficiale) in quel giorno di calendario. Calcolata sullo scenario scelto in alto: 16 anni, oppure solo gli ultimi 10.</p>
+  <div class="controls">
+    <label class="ctl">Regione
+      <select id="reg"><option value="">Tutte le regioni</option></select>
+    </label>
+    <label class="ctl">Ordina
+      <select id="sort"><option value="geo">Per regione</option><option value="peak">Per data media di picco</option><option value="max">Per probabilità massima</option></select>
+    </label>
+  </div>
+  <div class="scroll heat"><table id="heat"></table></div>
+</section>
+
+<section id="scheda">
+  <h2>Scheda del luogo</h2>
+  <p class="sub">Tutti gli anni, prima fioritura e piena fioritura, con la tendenza di lungo periodo.</p>
+  <div class="controls"><label class="ctl">Luogo<select id="pick"></select></label></div>
+  <div class="detail">
+    <div class="card"><svg id="chart" viewBox="0 0 640 360" role="img" aria-label="Date di fioritura per anno"></svg>
+      <div class="legend"><span><i class="sw" style="background:var(--open)"></i>Prima fioritura (kaika)</span><span><i class="sw" style="background:var(--peak)"></i>Piena fioritura (mankai)</span><span><i class="sw" style="background:var(--band);border:1px solid var(--peak)"></i>Il tuo viaggio</span></div>
+    </div>
+    <div class="card" id="info"></div>
+  </div>
+</section>
+
+<section id="lettura">
+  <h2>Cosa dicono i dati</h2>
+  <p class="sub">Le conclusioni che contano per costruire l'itinerario.</p>
+  <div class="insights" id="insights"></div>
+</section>
+
+<section id="viaggio">
+  <h2>Bozze di viaggio</h2>
+  <p class="sub">Tre ipotesi da confrontare, non ancora un piano. Tokyo all'inizio e alla fine è fissa; i giorni dal 31 marzo all'8 aprile cambiano con l'alternativa scelta. Le ricalibriamo a inizio 2027 sulle previsioni ufficiali.</p>
+  <div class="seg routes" role="group" aria-label="Alternativa">
+    <button data-r="A" aria-pressed="true">A · Seguire il fronte</button>
+    <button data-r="B" aria-pressed="false">B · Alpi e Tohoku in auto</button>
+    <button data-r="C" aria-pressed="false">C · Seto e Kansai rurale</button>
+  </div>
+  <div class="card rsum" id="rsum"></div>
+  <div class="days" id="days"></div>
+</section>
+
+<section id="metodo">
+  <h2>Metodo e fonti</h2>
+  <div class="prose">
+    <p><b>Città.</b> Date ufficiali dell'Agenzia meteorologica giapponese (JMA): kaika è il giorno in cui sull'albero campione si aprono almeno 5–6 fiori, mankai quello in cui è aperto circa l'80% dei boccioli. Varietà somei-yoshino. Anni 2011–2026.</p>
+    <p><b>Luoghi.</b> Hirosaki e Miharu Takizakura usano i registri dei rispettivi enti. Gli altri luoghi sono stimati applicando uno scarto fisso rispetto alla stazione JMA più vicina (quota, varietà, esposizione): l'errore tipico è di ±2–3 giorni. Il confronto su Miharu, dove abbiamo entrambi i dati, conferma che lo scarto rispetto a Fukushima resta stabile negli anni.</p>
+    <p><b>Piena fioritura</b> qui significa la finestra da 2 giorni prima a 4 giorni dopo il mankai. Dopo, per qualche giorno, c'è la pioggia di petali (hanafubuki), bellissima ma con alberi che si svuotano.</p>
+    <p><b>Stima 2027</b> è la media 2017–2026 di ciascun luogo: un punto di partenza, non una previsione. Le previsioni vere escono da gennaio 2027 (Japan Meteorological Corporation, tenki.jp, Weathernews) e vanno inserite qui appena disponibili.</p>
+    <p>Fonti: <a href="https://www.data.jma.go.jp/sakura/data/sakura004_07.html" target="_blank" rel="noopener">JMA, piena fioritura 2021–2026</a>, <a href="https://www.data.jma.go.jp/sakura/data/sakura004_06.html" target="_blank" rel="noopener">2011–2020</a>, <a href="https://www.data.jma.go.jp/sakura/data/sakura003_07.html" target="_blank" rel="noopener">prima fioritura 2021–2026</a>, <a href="https://www.data.jma.go.jp/sakura/data/sakura003_06.html" target="_blank" rel="noopener">2011–2020</a>; <a href="http://www.hirosakipark.or.jp/hirosakipark/record.html" target="_blank" rel="noopener">Parco di Hirosaki</a>; <a href="https://tabi-mag.jp/miharutakizakura/" target="_blank" rel="noopener">storico Miharu Takizakura</a>.</p>
+  </div>
+</section>
+</div>
+<footer><div class="wrap">Fase 1 del progetto Hanami 2027: dati storici. Prossime fasi: previsioni 2027, itinerario, logistica.</div></footer>
+
+<script>
+const P = [{"id": "Tokyo", "name": "Tokyo", "region": "Kanto", "lat": 35.69, "lon": 139.75, "kind": "citta", "src": "JMA", "m": [37, 37, 22, 30, 29, 31, 33, 24, 27, 22, 22, 27, 22, 35, 30, 28], "k": [28, 31, 16, 25, 23, 21, 21, 17, 21, 14, 14, 20, 14, 29, 24, 19]}, {"id": "Yokohama", "name": "Yokohama", "region": "Kanto", "lat": 35.44, "lon": 139.64, "kind": "citta", "src": "JMA", "m": [39, 40, 22, 31, 31, 33, 37, 27, 32, 28, 27, 28, 25, 38, 35, 32], "k": [30, 33, 18, 25, 23, 23, 25, 19, 21, 18, 17, 21, 15, 32, 25, 22]}, {"id": "Kumagaya", "name": "Kumagaya", "region": "Kanto", "lat": 36.15, "lon": 139.38, "kind": "citta", "src": "JMA", "m": [39, 41, 26, 32, 30, 32, 38, 26, 35, 25, 29, 30, 26, 39, 38, 34], "k": [32, 35, 19, 28, 27, 23, 28, 22, 25, 18, 19, 24, 17, 31, 27, 23]}, {"id": "Maebashi", "name": "Maebashi", "region": "Kanto", "lat": 36.4, "lon": 139.06, "kind": "citta", "src": "JMA", "m": [42, 43, 32, 34, 32, 32, 38, 28, 38, 26, 28, 32, 24, 39, 38, 32], "k": [34, 39, 22, 29, 28, 23, 33, 25, 27, 19, 21, 27, 18, 31, 28, 22]}, {"id": "Utsunomiya", "name": "Utsunomiya", "region": "Kanto", "lat": 36.55, "lon": 139.87, "kind": "citta", "src": "JMA", "m": [43, 43, 29, 35, 33, 35, 40, 29, 40, 34, 31, 33, 30, 42, 40, 34], "k": [37, 39, 21, 29, 30, 28, 34, 26, 28, 21, 20, 27, 20, 31, 28, 24]}, {"id": "Mito", "name": "Mito", "region": "Kanto", "lat": 36.38, "lon": 140.47, "kind": "citta", "src": "JMA", "m": [43, 43, 32, 33, 35, 37, 41, 28, 36, 31, 30, 37, 27, 39, 39, 34], "k": [37, 37, 21, 29, 30, 28, 34, 25, 27, 21, 20, 30, 20, 31, 27, 25]}, {"id": "Kofu", "name": "Kofu", "region": "Chubu", "lat": 35.66, "lon": 138.55, "kind": "citta", "src": "JMA", "m": [39, 38, 26, 35, 31, 34, 40, 29, 38, 33, 29, 28, 24, 36, 35, 24], "k": [29, 32, 19, 28, 25, 23, 30, 23, 27, 22, 18, 21, 17, 29, 26, 16]}, {"id": "Shizuoka", "name": "Shizuoka", "region": "Chubu", "lat": 34.98, "lon": 138.4, "kind": "citta", "src": "JMA", "m": [35, 32, 23, 31, 32, 36, 43, 27, 37, 38, 28, 30, 29, 39, 34, 33], "k": [20, 24, 17, 24, 22, 27, 33, 18, 28, 27, 20, 21, 19, 30, 26, 20]}, {"id": "Nagoya", "name": "Nagoya", "region": "Chubu", "lat": 35.17, "lon": 136.97, "kind": "citta", "src": "JMA", "m": [37, 37, 28, 31, 30, 31, 37, 27, 35, 32, 28, 30, 27, 38, 35, 30], "k": [27, 30, 19, 24, 21, 19, 28, 19, 22, 22, 17, 22, 17, 28, 26, 17]}, {"id": "Gifu", "name": "Gifu", "region": "Chubu", "lat": 35.4, "lon": 136.76, "kind": "citta", "src": "JMA", "m": [35, 37, 29, 31, 30, 31, 35, 26, 33, 32, 27, 28, 23, 35, 31, 26], "k": [28, 30, 21, 24, 23, 20, 28, 19, 22, 21, 16, 21, 16, 27, 25, 16]}, {"id": "Kyoto", "name": "Kyoto", "region": "Kansai", "lat": 35.01, "lon": 135.73, "kind": "citta", "src": "JMA", "m": [38, 40, 30, 33, 32, 33, 38, 28, 37, 30, 26, 30, 24, 36, 36, 30], "k": [28, 34, 22, 27, 27, 23, 31, 22, 27, 22, 16, 24, 17, 29, 27, 23]}, {"id": "Osaka", "name": "Osaka", "region": "Kansai", "lat": 34.68, "lon": 135.52, "kind": "citta", "src": "JMA", "m": [38, 40, 29, 33, 32, 32, 37, 26, 35, 34, 28, 30, 27, 37, 35, 34], "k": [31, 33, 21, 27, 26, 23, 30, 20, 27, 23, 19, 23, 19, 30, 27, 26]}, {"id": "Nara", "name": "Nara", "region": "Kansai", "lat": 34.69, "lon": 135.84, "kind": "citta", "src": "JMA", "m": [39, 40, 29, 32, 31, 33, 39, 29, 36, 34, 30, 31, 27, 39, 35, 31], "k": [31, 34, 22, 27, 27, 23, 34, 24, 29, 26, 21, 25, 20, 31, 28, 24]}, {"id": "Kobe", "name": "Kobe", "region": "Kansai", "lat": 34.7, "lon": 135.21, "kind": "citta", "src": "JMA", "m": [41, 40, 31, 32, 33, 34, 41, 29, 37, 34, 30, 32, 31, 38, 37, 36], "k": [31, 33, 21, 27, 27, 26, 34, 23, 27, 26, 24, 25, 24, 32, 27, 27]}, {"id": "Wakayama", "name": "Wakayama", "region": "Kansai", "lat": 34.23, "lon": 135.16, "kind": "citta", "src": "JMA", "m": [38, 35, 26, 31, 30, 31, 38, 27, 32, 31, 27, 29, 25, 34, 30, 33], "k": [27, 30, 18, 26, 23, 22, 30, 20, 25, 22, 18, 24, 20, 30, 26, 24]}, {"id": "Hikone", "name": "Hikone", "region": "Kansai", "lat": 35.27, "lon": 136.24, "kind": "citta", "src": "JMA", "m": [42, 43, 36, 40, 35, 36, 40, 32, 39, 34, 30, 37, 30, 40, 40, 33], "k": [32, 39, 30, 33, 31, 30, 36, 27, 35, 27, 22, 31, 23, 33, 35, 29]}, {"id": "Okayama", "name": "Okayama", "region": "Chugoku", "lat": 34.66, "lon": 133.92, "kind": "citta", "src": "JMA", "m": [38, 40, 31, 33, 33, 32, 38, 28, 36, 31, 29, 30, 27, 36, 36, 31], "k": [31, 34, 24, 28, 28, 26, 32, 25, 27, 24, 20, 26, 22, 30, 28, 25]}, {"id": "Hiroshima", "name": "Hiroshima", "region": "Chugoku", "lat": 34.4, "lon": 132.46, "kind": "citta", "src": "JMA", "m": [41, 40, 29, 30, 30, 33, 38, 28, 34, 34, 25, 29, 28, 36, 33, 30], "k": [32, 33, 22, 25, 24, 23, 27, 22, 22, 22, 11, 21, 19, 25, 26, 19]}, {"id": "Matsue", "name": "Matsue", "region": "Chugoku", "lat": 35.46, "lon": 133.07, "kind": "citta", "src": "JMA", "m": [43, 41, 31, 33, 33, 30, 38, 29, 32, 30, 27, 31, 27, 34, 33, 31], "k": [37, 37, 23, 27, 29, 23, 32, 26, 26, 23, 14, 26, 20, 28, 27, 27]}, {"id": "Tottori", "name": "Tottori", "region": "Chugoku", "lat": 35.49, "lon": 134.24, "kind": "citta", "src": "JMA", "m": [39, 41, 29, 33, 32, 31, 38, 28, 35, 31, 29, 32, 24, 37, 35, 31], "k": [33, 34, 20, 27, 28, 23, 33, 24, 26, 23, 19, 27, 19, 29, 27, 28]}, {"id": "Takamatsu", "name": "Takamatsu", "region": "Shikoku", "lat": 34.32, "lon": 134.05, "kind": "citta", "src": "JMA", "m": [39, 37, 30, 31, 32, 35, 39, 29, 35, 35, 27, 30, 29, 36, 34, 32], "k": [31, 33, 22, 26, 24, 26, 33, 24, 26, 23, 15, 24, 22, 29, 26, 25]}, {"id": "Matsuyama", "name": "Matsuyama", "region": "Shikoku", "lat": 33.84, "lon": 132.77, "kind": "citta", "src": "JMA", "m": [37, 35, 27, 29, 32, 34, 39, 27, 36, 40, 27, 28, 28, 36, 30, 35], "k": [25, 30, 17, 24, 27, 23, 30, 19, 22, 25, 15, 21, 18, 27, 25, 24]}, {"id": "Kochi", "name": "Kochi", "region": "Shikoku", "lat": 33.57, "lon": 133.55, "kind": "citta", "src": "JMA", "m": [31, 27, 22, 25, 30, 33, 37, 19, 29, 33, 23, 27, 24, 31, 28, 31], "k": [22, 21, 15, 18, 22, 24, 29, 15, 22, 24, 15, 19, 17, 23, 23, 16]}, {"id": "Tokushima", "name": "Tokushima", "region": "Shikoku", "lat": 34.07, "lon": 134.57, "kind": "citta", "src": "JMA", "m": [39, 36, 30, 32, 34, 39, 41, 28, 38, 36, 32, 30, 31, 37, 37, 37], "k": [31, 32, 24, 29, 28, 30, 34, 23, 28, 27, 25, 25, 23, 32, 26, 28]}, {"id": "Fukuoka", "name": "Fukuoka", "region": "Kyushu", "lat": 33.58, "lon": 130.38, "kind": "citta", "src": "JMA", "m": [33, 32, 22, 27, 29, 30, 36, 27, 29, 33, 22, 27, 26, 33, 28, 34], "k": [22, 27, 13, 19, 22, 19, 25, 19, 21, 21, 12, 17, 18, 27, 25, 24]}, {"id": "Nagasaki", "name": "Nagasaki", "region": "Kyushu", "lat": 32.73, "lon": 129.87, "kind": "citta", "src": "JMA", "m": [38, 33, 23, 27, 31, 30, 38, 26, 34, 34, 23, 29, 30, 33, 31, 34], "k": [23, 26, 16, 20, 22, 22, 30, 17, 20, 24, 14, 22, 21, 26, 24, 27]}, {"id": "Kumamoto", "name": "Kumamoto", "region": "Kyushu", "lat": 32.81, "lon": 130.71, "kind": "citta", "src": "JMA", "m": [38, 33, 22, 27, 31, 33, 39, 26, 35, 33, 27, 28, 29, 33, 28, 33], "k": [21, 25, 16, 20, 21, 22, 32, 17, 26, 23, 17, 20, 22, 26, 23, 23]}, {"id": "Kagoshima", "name": "Kagoshima", "region": "Kyushu", "lat": 31.55, "lon": 130.55, "kind": "citta", "src": "JMA", "m": [36, 36, 26, 31, 31, 37, 46, 29, 40, 50, 30, 32, 36, 43, 38, 36], "k": [23, 26, 15, 20, 21, 27, 36, 17, 25, 32, 17, 20, 24, 29, 24, 27]}, {"id": "Kanazawa", "name": "Kanazawa", "region": "Hokuriku", "lat": 36.59, "lon": 136.63, "kind": "citta", "src": "JMA", "m": [43, 44, 36, 38, 35, 35, 39, 34, 37, 32, 29, 36, 30, 39, 37, 34], "k": [38, 41, 30, 32, 31, 30, 35, 29, 32, 26, 23, 30, 23, 32, 29, 29]}, {"id": "Toyama", "name": "Toyama", "region": "Hokuriku", "lat": 36.71, "lon": 137.2, "kind": "citta", "src": "JMA", "m": [42, 47, 37, 39, 35, 32, 39, 30, 36, 34, 28, 37, 27, 41, 37, 33], "k": [39, 43, 29, 33, 32, 29, 36, 27, 28, 27, 24, 32, 22, 33, 33, 29]}, {"id": "Fukui", "name": "Fukui", "region": "Hokuriku", "lat": 36.06, "lon": 136.22, "kind": "citta", "src": "JMA", "m": [44, 44, 33, 34, 34, 31, 38, 33, 36, 31, 27, 37, 27, 37, 40, 31], "k": [38, 41, 28, 31, 31, 27, 36, 29, 28, 25, 22, 31, 22, 32, 35, 29]}, {"id": "Niigata", "name": "Niigata", "region": "Hokuriku", "lat": 37.9, "lon": 139.05, "kind": "citta", "src": "JMA", "m": [49, 51, 43, 43, 40, 38, 44, 36, 43, 38, 31, 42, 31, 42, 40, 34], "k": [45, 47, 38, 38, 33, 34, 39, 34, 36, 32, 29, 39, 27, 37, 37, 31]}, {"id": "Nagano", "name": "Nagano", "region": "Chubu", "lat": 36.66, "lon": 138.19, "kind": "citta", "src": "JMA", "m": [52, 52, 46, 48, 41, 39, 48, 37, 49, 44, 32, 42, 34, 44, 44, 37], "k": [46, 49, 37, 42, 35, 34, 45, 33, 44, 33, 29, 40, 28, 39, 39, 31]}, {"id": "Fukushima", "name": "Fukushima", "region": "Tohoku", "lat": 37.76, "lon": 140.47, "kind": "citta", "src": "JMA", "m": [46, 51, 39, 42, 37, 34, 43, 33, 39, 32, 29, 39, 28, 38, 39, 34], "k": [43, 47, 36, 39, 33, 30, 39, 29, 36, 28, 25, 35, 24, 34, 35, 29]}, {"id": "Sendai", "name": "Sendai", "region": "Tohoku", "lat": 38.26, "lon": 140.9, "kind": "citta", "src": "JMA", "m": [46, 54, 46, 42, 40, 37, 44, 35, 41, 34, 31, 42, 31, 40, 41, 35], "k": [43, 49, 40, 38, 34, 32, 38, 30, 36, 28, 28, 39, 26, 33, 35, 31]}, {"id": "Yamagata", "name": "Yamagata", "region": "Tohoku", "lat": 38.26, "lon": 140.35, "kind": "citta", "src": "JMA", "m": [56, 57, 50, 48, 46, 41, 48, 42, 48, 40, 36, 44, 36, 41, 45, 37], "k": [49, 54, 46, 45, 41, 37, 45, 35, 43, 34, 33, 42, 31, 38, 40, 33]}, {"id": "Morioka", "name": "Morioka", "region": "Tohoku", "lat": 39.7, "lon": 141.17, "kind": "citta", "src": "JMA", "m": [60, 59, 63, 52, 47, 49, 55, 51, 53, 51, 44, 49, 37, 45, 50, 43], "k": [51, 55, 54, 44, 40, 42, 48, 48, 49, 45, 40, 45, 34, 43, 47, 38]}, {"id": "Akita", "name": "Akita", "region": "Tohoku", "lat": 39.72, "lon": 140.1, "kind": "citta", "src": "JMA", "m": [58, 57, 60, 55, 46, 50, 50, 51, 51, 46, 38, 47, 38, 45, 49, 40], "k": [54, 55, 54, 51, 42, 45, 47, 48, 47, 39, 35, 43, 35, 41, 46, 37]}, {"id": "Aomori", "name": "Aomori", "region": "Tohoku", "lat": 40.82, "lon": 140.77, "kind": "citta", "src": "JMA", "m": [59, 62, 67, 56, 50, 52, 52, 53, 53, 52, 48, 51, 42, 49, 53, 47], "k": [56, 60, 60, 53, 45, 48, 48, 50, 49, 48, 44, 47, 38, 46, 48, 44]}, {"id": "Hakodate", "name": "Hakodate", "region": "Hokkaido", "lat": 41.81, "lon": 140.75, "kind": "citta", "src": "JMA", "m": [67, 66, 73, 62, 55, 57, 61, 59, 60, 62, 54, 56, 51, 54, 59, 51], "k": [63, 63, 69, 59, 52, 55, 58, 56, 55, 57, 51, 52, 45, 49, 54, 49]}, {"id": "Sapporo", "name": "Sapporo", "region": "Hokkaido", "lat": 43.06, "lon": 141.33, "kind": "citta", "src": "JMA", "m": [73, 63, 78, 62, 57, 62, 64, 60, 60, 63, 58, 56, 52, 55, 58, 55], "k": [68, 62, 74, 60, 53, 56, 59, 57, 55, 61, 53, 54, 46, 49, 54, 49]}, {"id": "chureito", "name": "Kawaguchiko e Chureito (Fuji)", "region": "Chubu", "lat": 35.5, "lon": 138.8, "kind": "luogo", "src": "Stima: Kofu +8 gg", "est": true, "m": [47, 46, 34, 43, 39, 42, 48, 37, 46, 41, 37, 36, 32, 44, 43, 32], "k": [37, 40, 27, 36, 33, 31, 38, 31, 35, 30, 26, 29, 25, 37, 34, 24], "tags": ["iconico", "panorama"], "note": "Ciliegi con il Fuji sullo sfondo: pagoda di Chureito e sponde del lago Kawaguchi. Fioritura più tardiva della pianura per la quota (~850 m)."}, {"id": "takato", "name": "Parco del castello di Takato", "region": "Chubu", "lat": 35.83, "lon": 138.06, "kind": "luogo", "src": "Stima: Nagano −5 gg", "est": true, "m": [47, 47, 41, 43, 36, 34, 43, 32, 44, 39, 27, 37, 29, 39, 39, 32], "k": [41, 44, 32, 37, 30, 29, 40, 28, 39, 28, 24, 35, 23, 34, 34, 26], "tags": ["iconico", "festa"], "note": "Circa 1.500 Takato-kohigan, varietà di un rosa più intenso della somei-yoshino. Tra i luoghi più celebri del Paese, molto affollato nel weekend."}, {"id": "matsumoto", "name": "Castello di Matsumoto", "region": "Chubu", "lat": 36.24, "lon": 137.97, "kind": "luogo", "src": "Stima: Nagano −5 gg", "est": true, "m": [47, 47, 41, 43, 36, 34, 43, 32, 44, 39, 27, 37, 29, 39, 39, 32], "k": [41, 44, 32, 37, 30, 29, 40, 28, 39, 28, 24, 35, 23, 34, 34, 26], "tags": ["yozakura", "iconico"], "note": "Castello nero originale con ciliegi sui fossati e illuminazione serale durante la fioritura."}, {"id": "takada", "name": "Castello di Takada (Joetsu)", "region": "Hokuriku", "lat": 37.1, "lon": 138.25, "kind": "luogo", "src": "Stima: Niigata −1 gg", "est": true, "m": [48, 50, 42, 42, 39, 37, 43, 35, 42, 37, 30, 41, 30, 41, 39, 33], "k": [44, 46, 37, 37, 32, 33, 38, 33, 35, 31, 28, 38, 26, 36, 36, 30], "tags": ["yozakura", "festa", "locale"], "note": "Considerato uno dei tre migliori yozakura del Giappone: migliaia di lanterne sui fossati. Poco battuto dagli stranieri."}, {"id": "hanamiyama", "name": "Hanamiyama (Fukushima)", "region": "Tohoku", "lat": 37.74, "lon": 140.52, "kind": "luogo", "src": "Stima: Fukushima +1 gg", "est": true, "m": [47, 52, 40, 43, 38, 35, 44, 34, 40, 33, 30, 40, 29, 39, 40, 35], "k": [44, 48, 37, 40, 34, 31, 40, 30, 37, 29, 26, 36, 25, 35, 36, 30], "tags": ["panorama", "locale"], "note": "Collina privata aperta al pubblico con ciliegi, pruni e fiori di stagione; fioriture scalate che allungano la finestra."}, {"id": "miharu", "name": "Miharu Takizakura", "region": "Tohoku", "lat": 37.43, "lon": 140.49, "kind": "luogo", "src": "Ente turistico di Miharu", "est": false, "m": [53, 58, 45, 48, 45, 41, 50, 37, 47, 38, 32, 43, 32, 41, 43, 37], "k": [48, 53, 40, 43, 40, 36, 45, 32, 42, 33, 27, 38, 27, 36, 38, 32], "tags": ["iconico", "yozakura"], "note": "Ciliegio piangente di oltre mille anni, uno dei tre grandi alberi di ciliegio del Giappone. Dati reali 2011–2026."}, {"id": "shiroishi", "name": "Shiroishi, Hitome Senbonzakura", "region": "Tohoku", "lat": 38.02, "lon": 140.7, "kind": "luogo", "src": "Stima: Sendai −1 gg", "est": true, "m": [45, 53, 45, 41, 39, 36, 43, 34, 40, 33, 30, 41, 30, 39, 40, 34], "k": [42, 48, 39, 37, 33, 31, 37, 29, 35, 27, 27, 38, 25, 32, 34, 30], "tags": ["panorama", "locale"], "note": "Circa 8 km di ciliegi lungo il fiume Shiroishi con i monti Zao ancora innevati. Da Funaoka si vede tutto il filare."}, {"id": "kitakami", "name": "Kitakami Tenshochi", "region": "Tohoku", "lat": 39.29, "lon": 141.12, "kind": "luogo", "src": "Stima: Morioka −2 gg", "est": true, "m": [58, 57, 61, 50, 45, 47, 53, 49, 51, 49, 42, 47, 35, 43, 48, 41], "k": [49, 53, 52, 42, 38, 40, 46, 46, 47, 43, 38, 43, 32, 41, 45, 36], "tags": ["festa", "locale"], "note": "Viale di ciliegi lungo il fiume Kitakami con barche e festival. Al limite della tua finestra."}, {"id": "kakunodate", "name": "Kakunodate", "region": "Tohoku", "lat": 39.6, "lon": 140.56, "kind": "luogo", "src": "Stima: Akita +3 gg", "est": true, "m": [61, 60, 63, 58, 49, 53, 53, 54, 54, 49, 41, 50, 41, 48, 52, 43], "k": [57, 58, 57, 54, 45, 48, 50, 51, 50, 42, 38, 46, 38, 44, 49, 40], "tags": ["iconico"], "note": "Ciliegi piangenti nel quartiere dei samurai e filare lungo il fiume Hinokinai. Quasi sempre dopo l'11 aprile."}, {"id": "hirosaki", "name": "Castello di Hirosaki", "region": "Tohoku", "lat": 40.61, "lon": 140.46, "kind": "luogo", "src": "Parco di Hirosaki", "est": false, "m": [63, 62, 68, 58, 54, 54, 56, 54, 55, 58, 50, 52, 44, 50, 54, 47], "k": [57, 58, 59, 54, 47, 49, 49, 51, 50, 50, 45, 45, 38, 45, 49, 42], "tags": ["iconico", "yozakura", "festa"], "note": "Il simbolo dell'hanami del nord. Dati reali del parco (inizio del periodo di piena fioritura)."}, {"id": "inuyama", "name": "Castello di Inuyama", "region": "Chubu", "lat": 35.39, "lon": 136.94, "kind": "luogo", "src": "Stima: Gifu +0 gg", "est": true, "m": [35, 37, 29, 31, 30, 31, 35, 26, 33, 32, 27, 28, 23, 35, 31, 26], "k": [28, 30, 21, 24, 23, 20, 28, 19, 22, 21, 16, 21, 16, 27, 25, 16], "tags": ["locale", "festa"], "note": "Castello originale sul fiume Kiso, strada storica e festival con carri a inizio aprile."}, {"id": "kaizu", "name": "Kaizu Osaki (Lago Biwa)", "region": "Kansai", "lat": 35.48, "lon": 136.13, "kind": "luogo", "src": "Stima: Hikone +2 gg", "est": true, "m": [44, 45, 38, 42, 37, 38, 42, 34, 41, 36, 32, 39, 32, 42, 42, 35], "k": [34, 41, 32, 35, 33, 32, 38, 29, 37, 29, 24, 33, 25, 35, 37, 31], "tags": ["panorama", "locale"], "note": "Quattro km di ciliegi sulla riva nord del lago Biwa, visibili anche in barca. Nord del lago più fresco di Kyoto."}, {"id": "kyoto_early", "name": "Kyoto: ciliegi piangenti precoci (Maruyama, Daigo-ji)", "region": "Kansai", "lat": 34.95, "lon": 135.82, "kind": "luogo", "src": "Stima: Kyoto −3 gg", "est": true, "m": [35, 37, 27, 30, 29, 30, 35, 25, 34, 27, 23, 27, 21, 33, 33, 27], "k": [25, 31, 19, 24, 24, 20, 28, 19, 24, 19, 13, 21, 14, 26, 24, 20], "tags": ["iconico", "yozakura"], "note": "Le shidare-zakura fioriscono alcuni giorni prima della somei-yoshino. Stima rispetto a Kyoto città."}, {"id": "kyoto_late", "name": "Kyoto: fioriture tardive (Ninna-ji, Haradani-en)", "region": "Kansai", "lat": 35.03, "lon": 135.71, "kind": "luogo", "src": "Stima: Kyoto +7 gg", "est": true, "m": [45, 47, 37, 40, 39, 40, 45, 35, 44, 37, 33, 37, 31, 43, 43, 37], "k": [35, 41, 29, 34, 34, 30, 38, 29, 34, 29, 23, 31, 24, 36, 34, 30], "tags": ["locale"], "note": "Omuro-zakura del Ninna-ji e giardino Haradani: il 'dopo' di Kyoto, quando il centro sfiorisce."}, {"id": "yoshino_shimo", "name": "Yoshino, Shimo Senbon", "region": "Kansai", "lat": 34.37, "lon": 135.86, "kind": "luogo", "src": "Stima: Nara +3 gg", "est": true, "m": [42, 43, 32, 35, 34, 36, 42, 32, 39, 37, 33, 34, 30, 42, 38, 34], "k": [34, 37, 25, 30, 30, 26, 37, 27, 32, 29, 24, 28, 23, 34, 31, 27], "tags": ["iconico", "yozakura"], "note": "Il primo dei quattro livelli di Yoshino (quota più bassa). Circa 30.000 ciliegi, soprattutto yamazakura."}, {"id": "yoshino_naka", "name": "Yoshino, Naka Senbon", "region": "Kansai", "lat": 34.36, "lon": 135.86, "kind": "luogo", "src": "Stima: Nara +5 gg", "est": true, "m": [44, 45, 34, 37, 36, 38, 44, 34, 41, 39, 35, 36, 32, 44, 40, 36], "k": [36, 39, 27, 32, 32, 28, 39, 29, 34, 31, 26, 30, 25, 36, 33, 29], "tags": ["iconico", "panorama"], "note": "Vista 'hitome senbon' da Yoshimizu-jinja: il colpo d'occhio classico di Yoshino."}, {"id": "yoshino_kami", "name": "Yoshino, Kami Senbon", "region": "Kansai", "lat": 34.355, "lon": 135.87, "kind": "luogo", "src": "Stima: Nara +7 gg", "est": true, "m": [46, 47, 36, 39, 38, 40, 46, 36, 43, 41, 37, 38, 34, 46, 42, 38], "k": [38, 41, 29, 34, 34, 30, 41, 31, 36, 33, 28, 32, 27, 38, 35, 31], "tags": ["panorama"], "note": "Dall'osservatorio Hanayagura si vedono naka e kami senbon insieme."}, {"id": "yoshino_oku", "name": "Yoshino, Oku Senbon", "region": "Kansai", "lat": 34.345, "lon": 135.88, "kind": "luogo", "src": "Stima: Nara +11 gg", "est": true, "m": [50, 51, 40, 43, 42, 44, 50, 40, 47, 45, 41, 42, 38, 50, 46, 42], "k": [42, 45, 33, 38, 38, 34, 45, 35, 40, 37, 32, 36, 31, 42, 39, 35], "tags": ["locale"], "note": "Il livello più alto e più tardivo, di solito a ridosso o dopo il tuo rientro."}, {"id": "matabei", "name": "Matabei-zakura (Uda)", "region": "Kansai", "lat": 34.51, "lon": 136.0, "kind": "luogo", "src": "Stima: Nara +6 gg", "est": true, "m": [45, 46, 35, 38, 37, 39, 45, 35, 42, 40, 36, 37, 33, 45, 41, 37], "k": [37, 40, 28, 33, 33, 29, 40, 30, 35, 32, 27, 31, 26, 37, 34, 30], "tags": ["locale", "panorama"], "note": "Grande ciliegio piangente isolato in campagna, amatissimo dai fotografi. Serve l'auto."}, {"id": "himeji", "name": "Castello di Himeji", "region": "Kansai", "lat": 34.84, "lon": 134.69, "kind": "luogo", "src": "Stima: Kobe −1 gg", "est": true, "m": [40, 39, 30, 31, 32, 33, 40, 28, 36, 33, 29, 31, 30, 37, 36, 35], "k": [30, 32, 20, 26, 26, 25, 33, 22, 26, 25, 23, 24, 23, 31, 26, 26], "tags": ["iconico", "yozakura"], "note": "Il castello bianco con circa mille ciliegi nel parco."}, {"id": "mint", "name": "Zecca di Osaka (sakura no torinuke)", "region": "Kansai", "lat": 34.7, "lon": 135.52, "kind": "luogo", "src": "Stima: Osaka +10 gg", "est": true, "m": [48, 50, 39, 43, 42, 42, 47, 36, 45, 44, 38, 40, 37, 47, 45, 44], "k": [41, 43, 31, 37, 36, 33, 40, 30, 37, 33, 29, 33, 29, 40, 37, 36], "tags": ["locale"], "note": "Passaggio tra centinaia di ciliegi a fiore doppio, aperto circa una settimana a metà aprile."}, {"id": "tsuyama", "name": "Parco Kakuzan (Tsuyama)", "region": "Chugoku", "lat": 35.07, "lon": 134.0, "kind": "luogo", "src": "Stima: Okayama +3 gg", "est": true, "m": [41, 43, 34, 36, 36, 35, 41, 31, 39, 34, 32, 33, 30, 39, 39, 34], "k": [34, 37, 27, 31, 31, 29, 35, 28, 30, 27, 23, 29, 25, 33, 31, 28], "tags": ["yozakura", "locale"], "note": "Rovine del castello con migliaia di ciliegi e illuminazione serale. Fuori dai circuiti internazionali."}, {"id": "onomichi", "name": "Onomichi, parco Senkoji", "region": "Chugoku", "lat": 34.41, "lon": 133.2, "kind": "luogo", "src": "Stima: Hiroshima +0 gg", "est": true, "m": [41, 40, 29, 30, 30, 33, 38, 28, 34, 34, 25, 29, 28, 36, 33, 30], "k": [32, 33, 22, 25, 24, 23, 27, 22, 22, 22, 11, 21, 19, 25, 26, 19], "tags": ["panorama", "locale"], "note": "Città in collina sul mare interno, ciliegi sopra il porto. Collegabile alla Shimanami Kaido."}, {"id": "akizuki", "name": "Akizuki (Fukuoka)", "region": "Kyushu", "lat": 33.47, "lon": 130.69, "kind": "luogo", "src": "Stima: Fukuoka +2 gg", "est": true, "m": [35, 34, 24, 29, 31, 32, 38, 29, 31, 35, 24, 29, 28, 35, 30, 36], "k": [24, 29, 15, 21, 24, 21, 27, 21, 23, 23, 14, 19, 20, 29, 27, 26], "tags": ["locale"], "note": "Piccola 'città del castello' di campagna con un viale di ciliegi. Molto tranquilla fuori dal weekend."}];
+const YEARS=[...Array(16)].map((_,i)=>2011+i);
+const VISITED=new Set(["Tokyo","Kyoto","Osaka","Nara","Hiroshima"]);
+const REG_ORDER=["Kyushu","Shikoku","Chugoku","Kansai","Chubu","Kanto","Hokuriku","Tohoku","Hokkaido"];
+const T0=29,T1=42;
+const $=s=>document.querySelector(s);
+const fmt=n=>n<=31?`${n} mar`:n<=61?`${n-31} apr`:`${n-61} mag`;
+const fmtLong=n=>{const w=["domenica","lunedì","martedì","mercoledì","giovedì","venerdì","sabato"];const dt=new Date(2027,2,n);return {d:n<=31?`${n} marzo`:`${n-31} aprile`,w:w[dt.getDay()]}};
+const mean=a=>a.reduce((s,x)=>s+x,0)/a.length;
+let state={day:33,scen:"p16",kind:"all",pick:"Kyoto"};
+
+// scenario
+const scen=$("#scen");
+scen.innerHTML=`<optgroup label="Probabilità"><option value="p16">Tutti gli anni 2011–2026</option><option value="p10">Ultimi 10 anni 2017–2026</option></optgroup>
+<optgroup label="Un anno singolo"><option value="est">Stima 2027 (media 2017–2026)</option>${YEARS.slice().reverse().map(y=>`<option value="y${y}">Come nel ${y}</option>`).join("")}</optgroup>`;
+const isProb=()=>state.scen[0]==="p";
+const yearIdx=()=>state.scen==="p10"?[6,7,8,9,10,11,12,13,14,15]:[...Array(16).keys()];
+function dates(p){ // for single-year scenarios
+  if(state.scen==="est")return {m:Math.round(mean(p.m.slice(6))),k:Math.round(mean(p.k.slice(6)))};
+  const i=+state.scen.slice(1)-2011;return {m:p.m[i],k:p.k[i]};
+}
+function stOf(m,k,d){if(d<k)return"pre";if(d<m-2)return"open";if(d<=m+4)return"peak";if(d<=m+8)return"fall";return"leaf"}
+const ST={pre:["Boccioli","--bud"],open:["Si apre","--open"],peak:["Piena fioritura","--peak"],fall:["Pioggia di petali","--fall"],leaf:["Sfiorito","--leaf"]};
+function pPeak(p,d){const ix=yearIdx();return ix.filter(i=>p.m[i]-2<=d&&d<=p.m[i]+4).length/ix.length}
+function visible(){return P.filter(p=>state.kind==="all"||p.kind===state.kind)}
+const cssv=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+function mix(a,b,t){const h=x=>x.replace("#","");const A=h(a),B=h(b);const c=i=>Math.round(parseInt(A.substr(i,2),16)*(1-t)+parseInt(B.substr(i,2),16)*t).toString(16).padStart(2,"0");return"#"+c(0)+c(2)+c(4)}
+
+// map
+const proj=(la,lo)=>[20+(lo-128.8)/(146-128.8)*480, 20+(44.2-la)/(44.2-30.8)*520];
+const LABELS=new Set(["Tokyo","Kyoto","Osaka","Fukuoka","Sendai","Sapporo","Kanazawa","Nagano","Hiroshima","Aomori","Kagoshima","Niigata","Nagoya"]);
+function drawMap(){
+  const svg=$("#map");const d=state.day;const bud=cssv("--bud"),peak=cssv("--peak");
+  let out=`<g stroke="var(--line)" stroke-width="1">`;
+  for(let la=32;la<=44;la+=2){const y=proj(la,0)[1];out+=`<line x1="20" x2="500" y1="${y}" y2="${y}" stroke-dasharray="2 6"/><text x="504" y="${y+4}" font-size="10" fill="var(--muted)" stroke="none">${la}°N</text>`}
+  out+=`</g>`;
+  const pts=visible().slice().sort((a,b)=>(a.kind==="citta")-(b.kind==="citta"));
+  for(const p of pts){const [x,y]=proj(p.lat,p.lon);let fill,r;
+    if(isProb()){const v=pPeak(p,d);fill=mix(bud,peak,Math.min(1,v*1.25));r=4+v*9}
+    else{const t=dates(p);const s=stOf(t.m,t.k,d);fill=`var(${ST[s][1]})`;r=s==="peak"?10:6}
+    const shape=p.kind==="citta"?`<circle class="dot" cx="${x}" cy="${y}" r="${r.toFixed(1)}" fill="${fill}" stroke="var(--panel)" stroke-width="1.5"/>`:`<rect class="dot" x="${(x-r*.8).toFixed(1)}" y="${(y-r*.8).toFixed(1)}" width="${(r*1.6).toFixed(1)}" height="${(r*1.6).toFixed(1)}" transform="rotate(45 ${x} ${y})" fill="${fill}" stroke="var(--panel)" stroke-width="1.5"/>`;
+    out+=`<g style="cursor:pointer" data-id="${p.id}"><title>${p.name}</title>${shape}</g>`;
+    if(p.kind==="citta"&&LABELS.has(p.id))out+=`<text x="${x+11}" y="${y+4}" font-size="12" fill="var(--ink)" style="paint-order:stroke" stroke="var(--panel)" stroke-width="3">${p.name}</text>`;
+  }
+  svg.innerHTML=out;
+  svg.querySelectorAll("g[data-id]").forEach(g=>g.onclick=()=>{state.pick=g.dataset.id;$("#pick").value=state.pick;drawDetail();$("#scheda").scrollIntoView({behavior:"smooth"})});
+  const lg=$("#legend");
+  lg.innerHTML=(isProb()?`<span><i class="sw" style="background:var(--bud)"></i>Picco improbabile</span><span><i class="sw" style="background:var(--peak)"></i>Picco molto probabile</span><span>Dimensione = probabilità</span>`:Object.values(ST).map(([n,c])=>`<span><i class="sw" style="background:var(${c})"></i>${n}</span>`).join(""))+`<span>● città JMA &nbsp;◆ luoghi</span>`;
+}
+function drawRank(){
+  const d=state.day;const L=fmtLong(d);
+  $("#daybig").innerHTML=`${L.d}<small>${L.w}, giorno ${d-T0+1} di ${T1-T0+1}</small>`;
+  let items;
+  if(isProb()){items=visible().map(p=>({p,v:pPeak(p,d)})).filter(o=>o.v>0).sort((a,b)=>b.v-a.v).slice(0,12);
+    $("#rankSub").textContent=`I luoghi con la probabilità più alta di essere in piena fioritura il ${L.d}, su ${yearIdx().length} anni.`;}
+  else{const ord={peak:0,open:1,fall:2};items=visible().map(p=>{const t=dates(p);return{p,s:stOf(t.m,t.k,d),t}}).filter(o=>o.s in ord).sort((a,b)=>ord[a.s]-ord[b.s]||Math.abs(a.t.m+1-d)-Math.abs(b.t.m+1-d)).slice(0,14);
+    $("#rankSub").textContent=state.scen==="est"?`Se il 2027 seguisse la media dell'ultimo decennio.`:`Come sarebbe andata con le date reali del ${state.scen.slice(1)}.`;}
+  $("#rank").innerHTML=items.map(o=>{const p=o.p;const badge=(p.est?`<span class="est">stima</span>`:"")+(VISITED.has(p.id)?`<span class="est">già visto</span>`:"");
+    const right=isProb()?`${Math.round(o.v*100)}%<span style="display:block;font-family:var(--sans);font-weight:400;font-size:12px;color:var(--muted)">${Math.round(o.v*yearIdx().length)} anni su ${yearIdx().length}</span>`:`<span style="font-size:14px;font-family:var(--sans);color:var(${ST[o.s][1]})">${ST[o.s][0]}</span>`;
+    const sub=isProb()?`${p.region} · picco medio ${fmt(Math.round(mean(yearIdx().map(i=>p.m[i]))))}`:`${p.region} · piena fioritura ${fmt(o.t.m)}`;
+    return `<li data-id="${p.id}" tabindex="0"><span class="nm">${p.name}${badge}</span><span class="pc">${right}</span><span class="rg">${sub}</span>${isProb()?`<span class="bar"><i style="width:${o.v*100}%"></i></span>`:""}</li>`}).join("")||`<li>Nessun luogo in fioritura per questo filtro.</li>`;
+  $("#rank").querySelectorAll("li[data-id]").forEach(li=>{const go=()=>{state.pick=li.dataset.id;$("#pick").value=state.pick;drawDetail();$("#scheda").scrollIntoView({behavior:"smooth"})};li.onclick=go;li.onkeydown=e=>{if(e.key==="Enter")go()}});
+}
+
+// gantt
+function drawGantt(){
+  const list=visible().slice().sort((a,b)=>mean(a.m)-mean(b.m));
+  const X0=14,X1=80,L=250,W=Math.max(820,L+ (X1-X0)*11),rowH=22,top=34,H=top+list.length*rowH+10;
+  const x=n=>L+(n-X0)/(X1-X0)*(W-L-16);
+  let s=`<rect x="${x(T0-.5)}" y="0" width="${x(T1+.5)-x(T0-.5)}" height="${H}" fill="var(--band)"/>`;
+  for(let n=X0;n<=X1;n++){const lab=n===1||n===32||n===62||(n%5===0&&n<=31)||(n>31&&(n-31)%5===0&&n<=61)||(n>61&&(n-61)%5===0);
+    if(lab){s+=`<line x1="${x(n)}" x2="${x(n)}" y1="${top-8}" y2="${H}" stroke="var(--line)"/><text x="${x(n)}" y="${top-14}" font-size="11" text-anchor="middle" fill="var(--muted)">${fmt(n)}</text>`}}
+  s+=`<line x1="${x(state.day)}" x2="${x(state.day)}" y1="${top-8}" y2="${H}" stroke="var(--peak)" stroke-width="1.5"/>`;
+  list.forEach((p,i)=>{const y=top+i*rowH;
+    s+=`<text x="${L-10}" y="${y+14}" font-size="12.5" text-anchor="end" fill="var(--ink)" style="cursor:pointer" data-id="${p.id}">${p.name.length>34?p.name.slice(0,33)+"…":p.name}</text>`;
+    let m,k;
+    if(isProb()){const ix=yearIdx();const ms=ix.map(i=>p.m[i]);m=Math.round(mean(ms));k=Math.round(mean(ix.map(i=>p.k[i])));
+      s+=`<line x1="${x(Math.min(...ms))}" x2="${x(Math.max(...ms))}" y1="${y+11}" y2="${y+11}" stroke="var(--peak)" stroke-width="1" opacity=".55"/>`;
+      ms.forEach(v=>s+=`<circle cx="${x(v)}" cy="${y+11}" r="2" fill="var(--peak)" opacity=".35"/>`);}
+    else{({m,k}=dates(p))}
+    const seg=(a,b,c,op=1)=>s+=`<rect x="${x(a-.5)}" y="${y+5}" width="${Math.max(0,x(b+.5)-x(a-.5))}" height="12" rx="3" fill="var(${c})" opacity="${op}"/>`;
+    if(isProb()){seg(k,m-3,"--open",.55);seg(m-2,m+4,"--peak",.28);seg(m+5,m+8,"--fall",.45)}
+    else{seg(k,m-3,"--open");seg(m-2,m+4,"--peak");seg(m+5,m+8,"--fall")}
+  });
+  const svg=$("#gantt");svg.setAttribute("viewBox",`0 0 ${W} ${H}`);svg.setAttribute("width",W);svg.setAttribute("height",H);svg.innerHTML=s;
+  svg.querySelectorAll("text[data-id]").forEach(t=>t.onclick=()=>{state.pick=t.dataset.id;$("#pick").value=state.pick;drawDetail();$("#scheda").scrollIntoView({behavior:"smooth"})});
+  $("#ganttSub").textContent=isProb()?"Ogni riga è un luogo, ordinato per data media di piena fioritura. I puntini sono i singoli anni: più sono sparsi, più quel luogo è imprevedibile. La fascia rosa è il tuo viaggio, la linea verticale il giorno scelto.":"Le date di quello scenario, luogo per luogo. La fascia rosa è il tuo viaggio, la linea verticale il giorno scelto.";
+  $("#legend2").innerHTML=`<span><i class="sw" style="background:var(--open)"></i>Si apre</span><span><i class="sw" style="background:var(--peak)"></i>Piena fioritura</span><span><i class="sw" style="background:var(--fall)"></i>Pioggia di petali</span>${isProb()?`<span><i class="sw" style="background:var(--peak);opacity:.4"></i>Anni singoli (piena fioritura)</span>`:""}`;
+}
+
+// heat
+const regSel=$("#reg");REG_ORDER.forEach(r=>regSel.insertAdjacentHTML("beforeend",`<option>${r}</option>`));
+function drawHeat(){
+  const days=[...Array(T1-T0+1)].map((_,i)=>T0+i);const reg=regSel.value;const sort=$("#sort").value;
+  let list=visible().filter(p=>!reg||p.region===reg).map(p=>({p,v:days.map(d=>pPeak(p,d)),mm:mean(p.m)}));
+  const peak=cssv("--peak"),panel=cssv("--panel");
+  const row=o=>`<tr><th data-id="${o.p.id}" title="${o.p.name}">${o.p.name}${o.p.est?" ·":""}</th>${o.v.map(v=>{const t=Math.min(1,v*1.2);const bg=mix(panel,peak,t);return `<td style="background:${bg};color:${t>.55?"#fff":"var(--muted)"}">${v?Math.round(v*100):""}</td>`}).join("")}</tr>`;
+  let body="";
+  if(sort==="geo"){REG_ORDER.forEach(r=>{const g=list.filter(o=>o.p.region===r).sort((a,b)=>a.mm-b.mm);if(g.length)body+=`<tr class="grp"><th colspan="${days.length+1}">${r}</th></tr>`+g.map(row).join("")})}
+  else{list.sort(sort==="peak"?(a,b)=>a.mm-b.mm:(a,b)=>Math.max(...b.v)-Math.max(...a.v));body=list.map(row).join("")}
+  $("#heat").innerHTML=`<thead><tr><th style="text-align:left;padding-left:10px">Luogo</th>${days.map(d=>`<th>${d<=31?d+"/3":(d-31)+"/4"}</th>`).join("")}</tr></thead><tbody>${body}</tbody>`;
+  $("#heat").querySelectorAll("th[data-id]").forEach(t=>t.onclick=()=>{state.pick=t.dataset.id;$("#pick").value=state.pick;drawDetail();$("#scheda").scrollIntoView({behavior:"smooth"})});
+}
+
+// detail
+const pick=$("#pick");
+REG_ORDER.forEach(r=>{const g=P.filter(p=>p.region===r).sort((a,b)=>mean(a.m)-mean(b.m));pick.insertAdjacentHTML("beforeend",`<optgroup label="${r}">${g.map(p=>`<option value="${p.id}">${p.name}</option>`).join("")}</optgroup>`)});
+function drawDetail(){
+  const p=P.find(q=>q.id===state.pick);pick.value=p.id;
+  const all=[...p.m,...p.k];const lo=Math.min(...all,T0)-3,hi=Math.max(...all,T1)+3;
+  const L=70,R=620,Tp=20,B=320;const x=i=>L+i/15*(R-L);const y=n=>Tp+(n-lo)/(hi-lo)*(B-Tp);
+  let s=`<rect x="${L}" y="${y(T0-.5)}" width="${R-L}" height="${y(T1+.5)-y(T0-.5)}" fill="var(--band)" stroke="var(--peak)" stroke-opacity=".35"/>`;
+  for(let n=Math.ceil(lo/5)*5;n<=hi;n+=5)s+=`<line x1="${L}" x2="${R}" y1="${y(n)}" y2="${y(n)}" stroke="var(--line)"/><text x="${L-8}" y="${y(n)+4}" font-size="11" text-anchor="end" fill="var(--muted)">${fmt(n)}</text>`;
+  YEARS.forEach((yr,i)=>{if(i%3===0||i===15)s+=`<text x="${x(i)}" y="${B+20}" font-size="11" text-anchor="middle" fill="var(--muted)">${yr}</text>`});
+  const path=a=>a.map((v,i)=>`${i?"L":"M"}${x(i)},${y(v)}`).join("");
+  s+=`<path d="${path(p.k)}" fill="none" stroke="var(--open)" stroke-width="2"/><path d="${path(p.m)}" fill="none" stroke="var(--peak)" stroke-width="2.2"/>`;
+  p.k.forEach((v,i)=>s+=`<circle cx="${x(i)}" cy="${y(v)}" r="3.5" fill="var(--open)"><title>${YEARS[i]}: prima fioritura ${fmt(v)}</title></circle>`);
+  p.m.forEach((v,i)=>s+=`<circle cx="${x(i)}" cy="${y(v)}" r="4.5" fill="var(--peak)"><title>${YEARS[i]}: piena fioritura ${fmt(v)}</title></circle>`);
+  const xs=YEARS.map((_,i)=>i),mx=mean(xs),my=mean(p.m);const sl=xs.reduce((a,i)=>a+(i-mx)*(p.m[i]-my),0)/xs.reduce((a,i)=>a+(i-mx)**2,0);
+  s+=`<line x1="${x(0)}" y1="${y(my-sl*mx)}" x2="${x(15)}" y2="${y(my+sl*(15-mx))}" stroke="var(--ink)" stroke-dasharray="4 5" opacity=".5"/>`;
+  s+=`<text x="${R}" y="${y(T0-.5)-6}" font-size="11" text-anchor="end" fill="var(--peak)">il tuo viaggio</text>`;
+  $("#chart").innerHTML=s;
+  const inW=p.m.filter(v=>v>=T0&&v<=T1).length;const last=p.m.slice(6);
+  const sd=Math.sqrt(mean(p.m.map(v=>(v-my)**2)));
+  $("#info").innerHTML=`<h2 style="font-size:24px">${p.name}</h2><div class="rg" style="color:var(--muted)">${p.region} · ${p.kind==="citta"?"Stazione JMA":p.src}</div>
+  <div class="stats">
+   <div><b>${fmt(Math.round(my))}</b><span>piena fioritura media 2011–2026</span></div>
+   <div><b>${fmt(Math.round(mean(last)))}</b><span>media ultimi 10 anni</span></div>
+   <div><b>${fmt(Math.min(...p.m))} – ${fmt(Math.max(...p.m))}</b><span>anno più precoce e più tardivo</span></div>
+   <div><b>±${sd.toFixed(1)} gg</b><span>variabilità da un anno all'altro</span></div>
+   <div><b>${inW} su 16</b><span>anni con picco dentro il tuo viaggio</span></div>
+   <div><b>${sl*10>0?"+":"−"}${Math.abs(sl*10).toFixed(1)} gg</b><span>tendenza per decennio (linea tratteggiata)</span></div>
+  </div>
+  <p style="margin:0;color:var(--muted);font-size:15px">${p.note||"Stazione ufficiale di osservazione: il riferimento per tutta l'area urbana."}</p>
+  ${p.tags?`<div class="tags">${p.tags.map(t=>`<span class="tag">${{iconico:"iconico",yozakura:"yozakura serale",locale:"poco turistico",panorama:"panorama",festa:"festival"}[t]}</span>`).join("")}</div>`:""}`;
+}
+
+// insights
+const INS=[
+ ["Il viaggio cade esattamente sul cuore della stagione","Tokyo raggiunge la piena fioritura in media il 28 marzo, Kyoto e Osaka il 2 aprile, Kanazawa il 5, Fukushima il 7, Sendai e Niigata il 9. Il fronte attraversa quasi tutto l'Honshu centrale durante i tuoi 15 giorni."],
+ ["Nessun giorno è sicuro, ma la sequenza sì","Anche nei luoghi migliori la probabilità di picco in un giorno fisso raramente supera il 60–70%, perché le stagioni oscillano di ±4–6 giorni. Però gli anni si muovono in blocco: se Tokyo è in anticipo, lo è anche Kyoto. Conviene fissare l'ordine delle tappe, non le date esatte."],
+ ["Arrivo il 29 marzo: Tokyo va vista subito","Negli ultimi 10 anni, il 29 e 30 marzo Tokyo era fiorita ogni volta, al picco circa 4 volte su 10 (a volte già in pioggia di petali: 2018, 2020, 2021 e 2023 hanno avuto il picco entro il 24). Dal 2 aprile le probabilità scendono veloci: i primi giorni in città sono quelli che contano."],
+ ["Il nord accelera più di tutti","Tohoku e Hokuriku mostrano la tendenza più forte: da 7 a 11 giorni di anticipo per decennio (parte del dato viene dai freddi 2011–2013). Fukushima, Sendai, Takada e Miharu entrano nella tua finestra molto più spesso che in passato."],
+ ["Hirosaki e Kakunodate sono fuori portata","In 16 anni Hirosaki non ha mai raggiunto la piena fioritura entro l'11 aprile: il record assoluto è il 13 aprile 2023. Kakunodate ci è arrivato vicino solo negli anni più precoci. Il tuo 'nord' realistico è Fukushima, Miharu, Shiroishi, Sendai e la costa del Mar del Giappone."],
+ ["Il Fuji rende di più alla fine, non all'inizio","Kawaguchiko è a circa 850 metri e fiorisce una settimana dopo Tokyo. Il 30–31 marzo ci sono fiori solo 4–5 anni su 10; dall'8 all'11 aprile 9–10 su 10. Portare la gita al lago nei giorni del rientro unisce Fuji e ciliegi, e lascia Tokyo ai primi giorni."],
+ ["La seconda settimana premia quota e latitudine","Dal 6 all'11 aprile i luoghi con più probabilità di picco sono Kanazawa, Hikone e il lago Biwa, i livelli alti di Yoshino, Takada e Niigata, Kawaguchiko. Kyoto a quel punto vive delle fioriture tardive (Ninna-ji, Haradani-en)."],
+];
+$("#insights").innerHTML=INS.map(([h,p])=>`<div class="card"><h3>${h}</h3><p>${p}</p></div>`).join("");
+
+
+// viaggio
+const FIX={
+29:{b:"Tokyo",txt:"Atterraggio a Haneda. Primo hanami la sera: Meguro-gawa o Chidorigafuchi illuminati.",ids:["Tokyo"]},
+30:{b:"Tokyo",txt:"Giornata piena in città, all'alba nei parchi grandi prima della folla, picnic hanami con i locali nel pomeriggio.",ids:["Tokyo"]},
+39:{b:"Rientro a Tokyo",txt:"Mattina nell'ultima tappa, poi treno per Tokyo. Hotel per 3 notti.",ids:[]},
+40:{b:"Tokyo · Fuji o shopping",txt:"Giorno jolly: se il meteo dà Fuji limpido, gita a Kawaguchiko partendo presto; altrimenti shopping e gita il giorno dopo.",ids:["chureito"]},
+41:{b:"Tokyo · Fuji o shopping",txt:"L'altro giorno jolly. In città restano i ciliegi tardivi a fiore doppio, per esempio a Shinjuku Gyoen.",ids:["chureito","Tokyo"]},
+42:{b:"Volo da Haneda",txt:"Ultima mattina e partenza.",ids:[]}};
+const ROUTES={
+A:{name:"Seguire il fronte: Kyoto, Yoshino, lago Biwa, Hokuriku",style:"Metà famoso, metà poco battuto. Si segue il fronte verso nord e si rientra a Tokyo in treno veloce dalla costa del Mar del Giappone.",move:"Solo treni. Cambi di hotel: Kyoto, Yoshino, Hikone, Kanazawa, Joetsu.",pro:"È il percorso con più giorni al picco negli anni normali e chiude vicino a Tokyo.",con:"Cinque hotel diversi. Kyoto e Kenrokuen sono affollati: vanno fatti all'alba.",
+d:{31:{b:"Kyoto",txt:"Shinkansen da Tokyo (circa 2h15). Sera: lungo il Takase-gawa e il Kamo-gawa illuminati.",ids:["Kyoto"],k:"famoso"},
+32:{b:"Kyoto",txt:"All'alba Daigo-ji, poi il canale Yamashina Sosui, una passeggiata sotto i ciliegi frequentata soprattutto dai residenti.",ids:["Kyoto","kyoto_early"],k:"mix"},
+33:{b:"Kyoto",txt:"Mattina ai giardini del Palazzo Imperiale (grandi ciliegi piangenti), pomeriggio picnic sul Kamo-gawa a Demachiyanagi.",ids:["Kyoto"],k:"locale"},
+34:{b:"Yoshino",txt:"Treno Kintetsu da Kyoto (circa 2h). Notte in montagna, in un ryokan o tempio con alloggio: la sera la folla dei visitatori giornalieri se ne va.",ids:["yoshino_shimo","yoshino_naka"],k:"famoso"},
+35:{b:"Hikone",txt:"All'alba Kami Senbon e Hanayagura, poi Hikone. Sera: castello illuminato sui fossati.",ids:["yoshino_kami","Hikone"],k:"mix"},
+36:{b:"Lago Biwa → Kanazawa",txt:"Kaizu Osaki dalla stazione di Makino, anche in barca. Poi Tsuruga e Shinkansen Hokuriku per Kanazawa.",ids:["kaizu","Hikone"],k:"locale"},
+37:{b:"Kanazawa",txt:"Kenrokuen all'apertura, poi i ciliegi lungo i fiumi Asano e Sai. Sera: castello illuminato.",ids:["Kanazawa"],k:"mix"},
+38:{b:"Joetsu (Takada)",txt:"Shinkansen per Joetsu-Myoko (circa 1h). Sera: yozakura del castello di Takada, con migliaia di lanterne.",ids:["takada","Kanazawa"],k:"locale"},
+39:{b:"Rientro a Tokyo",txt:"Takada alla luce del mattino, poi Shinkansen per Tokyo (circa 2h).",ids:["takada"],k:"locale"}}},
+B:{name:"Kyoto, Alpi giapponesi e Tohoku del sud in auto",style:"Il più autentico e meno internazionale. Kyoto per la parte famosa, poi campagna, castelli e grandi alberi solitari.",move:"Treni fino a Fukushima, poi auto per 3 giorni. Cambi di hotel: Kyoto, Matsumoto, Fukushima.",pro:"Pochissimi stranieri, alberi monumentali, rientro facile in Shinkansen.",con:"Il più esposto agli anni precoci: in quelle stagioni il Tohoku sfiorisce prima del tuo arrivo.",
+d:{31:{b:"Kyoto",txt:"Come nell'alternativa A.",ids:["Kyoto"],k:"famoso"},32:{b:"Kyoto",txt:"Daigo-ji all'alba e Yamashina Sosui.",ids:["Kyoto","kyoto_early"],k:"mix"},33:{b:"Kyoto",txt:"Palazzo Imperiale e picnic sul Kamo-gawa.",ids:["Kyoto"],k:"locale"},
+34:{b:"Matsumoto",txt:"Treno via Nagoya (circa 3h). Sera: castello nero illuminato tra i ciliegi.",ids:["matsumoto"],k:"mix"},
+35:{b:"Takato in auto",txt:"Auto a noleggio: parco di Takato (circa 1h15) per i ciliegi rosa intenso. Rientro a Matsumoto.",ids:["takato","matsumoto"],k:"famoso"},
+36:{b:"Fukushima",txt:"Giornata di trasferimento via Omiya. Sera in città, ritiro dell'auto.",ids:["Fukushima"],k:"locale"},
+37:{b:"Hanamiyama",txt:"Hanamiyama al mattino presto, poi i dintorni di Fukushima.",ids:["hanamiyama","Fukushima"],k:"locale"},
+38:{b:"Miharu",txt:"Miharu Takizakura, l'albero millenario, all'alba o con l'illuminazione serale. Strade di campagna tra altri grandi ciliegi isolati.",ids:["miharu"],k:"famoso"},
+39:{b:"Shiroishi → Tokyo",txt:"Funaoka e i filari sul fiume Shiroishi con i monti Zao innevati. Riconsegna dell'auto e Shinkansen per Tokyo.",ids:["shiroishi"],k:"locale"}}},
+C:{name:"Mare interno di Seto, castelli e Kansai rurale",style:"Il più vario: città sul mare, castelli, Kyoto e montagna. Meno 'fronte', più atmosfera.",move:"Treni, più un giorno d'auto nella campagna di Nara. Cambi di hotel: Onomichi, Tsuyama, Kyoto, Yoshino, Nara.",pro:"Regge bene gli anni precoci, come A. Himeji e Onomichi arrivano al picco proprio nei tuoi giorni.",con:"Lungo trasferimento il primo giorno (circa 4h) e rientro a Tokyo di circa 3h dalla zona di Nara.",
+d:{31:{b:"Onomichi",txt:"Shinkansen fino a Fukuyama, poi treno locale. Tramonto dal parco Senkoji sopra il porto.",ids:["onomichi"],k:"locale"},
+32:{b:"Onomichi · Shimanami",txt:"Un tratto della Shimanami Kaido in bici tra le isole, rientro a Onomichi.",ids:["onomichi"],k:"locale"},
+33:{b:"Tsuyama",txt:"Treno via Okayama (circa 2h). Sera: yozakura del parco Kakuzan, fuori dai circuiti internazionali.",ids:["tsuyama"],k:"locale"},
+34:{b:"Himeji → Kyoto",txt:"Castello di Himeji la mattina, poi Kyoto in Shinkansen.",ids:["himeji","Kyoto"],k:"famoso"},
+35:{b:"Kyoto",txt:"All'alba Daigo-ji o il Palazzo Imperiale, poi Yamashina Sosui.",ids:["Kyoto"],k:"mix"},
+36:{b:"Kyoto",txt:"Fioriture tardive: Ninna-ji (omuro-zakura) e picnic sul Kamo-gawa.",ids:["Kyoto","kyoto_late"],k:"mix"},
+37:{b:"Yoshino",txt:"Treno Kintetsu. Notte in montagna per vivere Naka e Kami Senbon senza la folla del giorno.",ids:["yoshino_naka","yoshino_kami"],k:"famoso"},
+38:{b:"Uda in auto",txt:"Auto da Yoshino o Sakurai: Matabei-zakura e la campagna dell'altopiano di Uda. Notte a Nara.",ids:["matabei","yoshino_kami"],k:"locale"},
+39:{b:"Rientro a Tokyo",txt:"Nara → Kyoto → Shinkansen (circa 3h).",ids:[],k:""}}}
+};
+let route="A";
+const KL={famoso:"famoso",mix:"famoso + locale",locale:"poco turistico"};
+function drawTrip(){
+  const ix=[6,7,8,9,10,11,12,13,14,15],byId=id=>P.find(p=>p.id===id);
+  const pk=(p,d,I=ix)=>I.filter(i=>p.m[i]-2<=d&&d<=p.m[i]+4).length/I.length;
+  const vs=(p,d)=>ix.filter(i=>p.k[i]<=d&&d<=p.m[i]+8).length/ix.length;
+  const meter=(p,d)=>{const a=pk(p,d),b=vs(p,d);return `<div class="meter"><b>${p.name}</b>${p.est?' <span class="est">stima</span>':''}<br><span style="color:var(--muted)">fiorito ${Math.round(b*10)} anni su 10, al picco ${Math.round(a*10)} su 10</span><div class="mb"><i style="width:${a*100}%;background:var(--peak)"></i><i style="width:${Math.max(0,b-a)*100}%;background:var(--open)"></i></div></div>`};
+  const R=ROUTES[route];
+  // robustezza per anno
+  const days=Object.entries(R.d).filter(([d,o])=>o.ids.length);
+  const tok=byId("Tokyo");
+  const yrs=YEARS.map((y,i)=>{const c=days.filter(([d,o])=>o.ids.some(id=>{const p=byId(id);return p.m[i]-2<=+d&&+d<=p.m[i]+4})).length;const tm=tok.m[i];const kind=tm<=24?"precoce":tm>=33?"tardiva":"normale";return{y,c,kind}});
+  const n=days.length,peak=cssv("--peak"),panel=cssv("--panel");
+  const avg=(f)=>{const a=yrs.filter(f);return a.length?(a.reduce((s,x)=>s+x.c,0)/a.length).toFixed(1):"–"};
+  $("#rsum").innerHTML=`<h3>${R.name}</h3><p style="margin:0">${R.style}</p>
+  <div class="cols"><div><b>Spostamenti</b>${R.move}</div><div><b>Punto forte</b>${R.pro}</div><div><b>Punto debole</b>${R.con}</div></div>
+  <div style="margin-top:14px"><b style="font-size:13px;color:var(--muted);font-weight:500">Come sarebbe andato negli anni passati: giorni con almeno una tappa al picco, su ${n}</b>
+  <div class="yrs">${yrs.map(o=>{const t=o.c/n;return `<span title="Stagione ${o.kind}" style="background:${mix(panel,peak,t)};color:${t>.55?"#fff":"var(--ink)"}"><b>${o.c}</b>${o.y}</span>`}).join("")}</div>
+  <p style="margin:8px 0 0;font-size:14px;color:var(--muted)">Media: anni normali ${avg(o=>o.kind==="normale")} giorni, anni precoci ${avg(o=>o.kind==="precoce")}, anni tardivi ${avg(o=>o.kind==="tardiva")}. "Precoce" e "tardiva" sono definite sulla data di Tokyo (picco entro il 24 marzo, o dal 2 aprile in poi).</p></div>`;
+  let h="";
+  for(let d=29;d<=42;d++){const o=FIX[d]&&(d<31||d>=40)?FIX[d]:(R.d[d]||FIX[d]);const L=fmtLong(d);const fix=d<31||d>=39&&!R.d[d]||d>=40;
+    const body=(o.ids||[]).map(id=>meter(byId(id),d)).join("");
+    h+=`<div class="dayrow"><div class="dd">${L.d}<small>${L.w}</small></div><div><span class="blk ${fix?"fix":"free"}">${o.b}</span><p class="act">${o.k?`<span class="k">${KL[o.k]}</span>`:""}${o.txt}</p>${body?`<div class="meters">${body}</div>`:""}</div></div>`}
+  $("#days").innerHTML=h;
+}
+document.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{route=b.dataset.r;document.querySelectorAll("[data-r]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawTrip()});
+
+
+// periodi
+const lreg=$("#lreg");REG_ORDER.forEach(r=>lreg.insertAdjacentHTML("beforeend",`<option>${r}</option>`));
+function drawLook(){
+  const q=$("#q").value.trim().toLowerCase(),rg=lreg.value,w=$("#lwin").value;
+  const peak=cssv("--peak"),panel=cssv("--panel");
+  let rows=P.map(p=>{const m10=Math.round(mean(p.m.slice(6))),k10=Math.round(mean(p.k.slice(6)));const inW=p.m.filter(v=>v-2<=T1&&v+4>=T0&&v>=T0-4&&v<=T1+2).length;const inPk=p.m.filter(v=>v>=T0&&v<=T1).length;return{p,m10,k10,inPk}})
+    .filter(o=>(!rg||o.p.region===rg)&&(!q||(o.p.name+" "+o.p.region).toLowerCase().includes(q))&&(!w||o.inPk>0))
+    .sort((a,b)=>a.m10-b.m10);
+  $("#look").innerHTML=`<thead><tr><th>Luogo</th><th>Prima fioritura</th><th>Piena fioritura</th><th>Periodo migliore</th><th>Estremi 2011–2026</th><th>Picco nel viaggio</th></tr></thead><tbody>${rows.map(o=>{const p=o.p,t=o.inPk/16;return `<tr data-id="${p.id}"><td class="nm">${p.name}${p.est?'<span class="est">stima</span>':''}${VISITED.has(p.id)?'<span class="est">già visto</span>':''}<span class="mini">${p.region}</span></td><td>${fmt(o.k10)}</td><td>${fmt(o.m10)}</td><td class="best"><b>${fmt(o.m10-2)} – ${fmt(o.m10+4)}</b></td><td>${fmt(Math.min(...p.m))} – ${fmt(Math.max(...p.m))}</td><td><span class="pill" style="background:${mix(panel,peak,t)};color:${t>.55?"#fff":"var(--ink)"}">${o.inPk} su 16</span></td></tr>`}).join("")||'<tr><td colspan="6">Nessun luogo trovato.</td></tr>'}</tbody>`;
+  $("#look").querySelectorAll("tr[data-id]").forEach(tr=>tr.onclick=()=>{state.pick=tr.dataset.id;drawDetail();$("#scheda").scrollIntoView({behavior:"smooth"})});
+}
+$("#q").oninput=drawLook;lreg.onchange=drawLook;$("#lwin").onchange=drawLook;
+
+// events
+function all(){drawLook();drawTrip();drawMap();drawRank();drawGantt();drawHeat();}
+$("#day").oninput=e=>{state.day=+e.target.value;drawMap();drawRank();drawGantt()};
+scen.onchange=e=>{state.scen=e.target.value;all()};
+regSel.onchange=drawHeat;$("#sort").onchange=drawHeat;
+pick.onchange=e=>{state.pick=e.target.value;drawDetail()};
+document.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{state.kind=b.dataset.k;document.querySelectorAll("[data-k]").forEach(x=>x.setAttribute("aria-pressed",x===b));all()});
+document.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{const t=b.dataset.t;if(t==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",t);document.querySelectorAll("[data-t]").forEach(x=>x.setAttribute("aria-pressed",x===b));try{localStorage.setItem("theme",t)}catch(e){}all();drawDetail()});
+try{const t=localStorage.getItem("theme");if(t){document.querySelector(`[data-t="${t}"]`).click()}}catch(e){}
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{all();drawDetail()});
+all();drawDetail();
+</script>
+</body>
+</html>
