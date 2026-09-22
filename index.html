@@ -149,6 +149,17 @@ table.look{border-collapse:collapse;width:100%;min-width:840px;font-size:15px}
 .drafts .dayrow{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
 .drafts .dd{font-weight:700}.drafts .dd small{display:block;font-weight:400;color:var(--muted);font-size:13px}
 .drafts .k{display:inline-block;font-size:12px;border-radius:4px;padding:0 6px;margin-right:6px;border:1px solid var(--line);color:var(--muted)}
+.planner>div{min-width:0}
+.stop .ctrls select{flex:1 1 0;width:0;min-width:120px!important}
+.stop{min-width:0}
+.transfer{list-style:none;margin:-4px 0 -4px 22px;padding:6px 12px;border-left:3px dashed var(--line);font-size:14px;color:var(--muted)}
+.transfer b{color:var(--ink)}
+.warn{display:inline-block;font-size:12px;font-weight:700;color:var(--warn);border:1px solid var(--warn);border-radius:4px;padding:0 6px;margin-left:4px}
+table.cmp{border-collapse:collapse;width:100%;min-width:560px;font-size:14.5px}
+.cmp th{text-align:left;font-weight:500;font-size:12.5px;color:var(--muted);padding:6px 8px;border-bottom:1px solid var(--line)}
+.cmp td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}
+.cmp .mini{display:block;font-size:12px;color:var(--muted)}
+.cmp tr.cur td{background:var(--bg)}
 footer{padding:30px 0 60px;color:var(--muted);font-size:14px;border-top:1px solid var(--line)}
 @media (max-width:900px){.hero,.detail,.planner{grid-template-columns:1fr}}
 @media (max-width:600px){body{font-size:17px}.tlrow{grid-template-columns:78px minmax(0,1fr);}.tlrow .val{grid-column:1/-1;text-align:left;display:flex;gap:10px;align-items:baseline}.tlrow .val b{display:inline}.drafts .dayrow{grid-template-columns:1fr}}
@@ -173,7 +184,7 @@ footer{padding:30px 0 60px;color:var(--muted);font-size:14px;border-top:1px soli
 
 <section id="pianifica">
   <h2>Pianificatore</h2>
-  <p class="sub">Aggiungi le tappe nell'ordine del viaggio con le notti di ognuna. Il pianificatore calcola dove sei ogni giorno e quanta fioritura potresti trovare. A ogni tappa puoi aggiungere le gite in giornata: per ogni giorno conta il luogo migliore tra base e gite, come se lo scegliessi sul momento guardando i bollettini di fioritura. Il piano si salva da solo in questo browser e puoi condividerlo con un link.</p>
+  <p class="sub">Aggiungi le tappe nell'ordine del viaggio con le notti di ognuna. Il pianificatore calcola dove sei ogni giorno e quanta fioritura potresti trovare. A ogni tappa puoi aggiungere le gite in giornata: per ogni giorno conta il luogo migliore tra base e gite, come se lo scegliessi sul momento guardando i bollettini di fioritura. Tra una tappa e l'altra trovi percorso e tempi di treno indicativi. Il piano si salva da solo in questo browser e puoi condividerlo con un link.</p>
   <div class="controls">
     <label class="ctl">Parti da una bozza
       <select id="preset"><option value="">Scegli…</option><option value="now">Struttura attuale (2 basi + Fuji)</option><option value="A">A · Seguire il fronte</option><option value="B">B · Alpi e Tohoku</option><option value="C">C · Seto e Kansai rurale</option><option value="empty">Piano vuoto</option></select>
@@ -201,6 +212,7 @@ footer{padding:30px 0 60px;color:var(--muted);font-size:14px;border-top:1px soli
       <div class="card" id="yrcard"></div>
       <div class="tl" id="tl"></div>
       <div class="card tips" id="ptips"></div>
+      <div class="card" id="variants" style="margin-top:14px"></div>
     </div>
   </div>
 </section>
@@ -510,18 +522,51 @@ d:{31:{b:"Onomichi",txt:"Shinkansen fino a Fukuyama, poi treno locale. Tramonto 
 39:{b:"Rientro a Tokyo",txt:"Nara → Kyoto → Shinkansen (circa 3h).",ids:[],k:""}}}
 };
 
-let route="A";
+let draftSel="A";
 const KL={famoso:"famoso",mix:"famoso + locale",locale:"poco turistico"};
 function drawDrafts(){
-  const R=ROUTES[route];
+  const R=ROUTES[draftSel];
   $("#rsum").innerHTML=`<h3 style="font-family:var(--serif);font-size:21px">${R.name}</h3><p style="margin:0 0 10px">${R.style}</p><p style="margin:0 0 4px"><b>Spostamenti.</b> ${R.move}</p><p style="margin:0 0 4px"><b>Punto forte.</b> ${R.pro}</p><p style="margin:0 0 12px"><b>Punto debole.</b> ${R.con}</p><button class="btn" type="button" id="loadDraft">Apri questa bozza nel pianificatore</button>`;
-  $("#loadDraft").onclick=()=>{loadPreset(route);$("#pianifica").scrollIntoView({behavior:"smooth"})};
+  $("#loadDraft").onclick=()=>{loadPreset(draftSel);$("#pianifica").scrollIntoView({behavior:"smooth"})};
   let h="";for(let d=29;d<=42;d++){const o=(d<31||d>=40)?FIX[d]:(R.d[d]||FIX[d]);
     const m=(o.ids||[]).map(id=>{const p=byId(id);return `${p.name}: fiorito ${Math.round(vs(p,d,IX10)*10)} su 10, al picco ${Math.round(pk(p,d,IX10)*10)} su 10`}).join(" · ");
     h+=`<div class="dayrow"><div class="dd">${longD(d)}<small>${WDL[wday(d)]}</small></div><div><b>${o.b}</b><p style="margin:4px 0">${o.k?`<span class="k">${KL[o.k]}</span>`:""}${o.txt}</p>${m?`<div style="font-size:13.5px;color:var(--muted)">${m}</div>`:""}</div></div>`}
   $("#days").innerHTML=h;
 }
-document.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{route=b.dataset.r;document.querySelectorAll("[data-r]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawDrafts()});
+document.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{draftSel=b.dataset.r;document.querySelectorAll("[data-r]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawDrafts()});
+/* ---------- spostamenti ---------- */
+const HUBNAME={Fukuyama:"Fukuyama",Koriyama:"Koriyama",Tsuruga:"Tsuruga",Joetsu:"Joetsu-Myoko"};
+const EDGES=[
+["Tokyo","Yokohama",25,"treno"],["Tokyo","Kumagaya",40,"shinkansen"],["Tokyo","Maebashi",70,"shinkansen + treno"],["Tokyo","Utsunomiya",50,"shinkansen"],["Tokyo","Mito",75,"treno espresso"],["Tokyo","Shizuoka",60,"shinkansen"],["Tokyo","Kofu",90,"treno espresso"],["Tokyo","Nagoya",100,"shinkansen"],["Tokyo","Nagano",80,"shinkansen"],["Tokyo","Niigata",100,"shinkansen"],["Tokyo","Koriyama",80,"shinkansen"],["Tokyo","Sendai",95,"shinkansen"],["Tokyo","chureito",120,"bus o treno Fuji Excursion"],
+["Kofu","chureito",70,"treno"],["Kofu","matsumoto",65,"treno espresso"],["Shizuoka","Nagoya",55,"shinkansen"],
+["Nagoya","Kyoto",35,"shinkansen"],["Nagoya","Gifu",20,"treno"],["Nagoya","inuyama",30,"treno"],["Nagoya","matsumoto",125,"treno espresso"],["Nagoya","Hikone",40,"shinkansen + treno"],
+["Kyoto","Osaka",15,"shinkansen"],["Kyoto","Nara",45,"treno"],["Kyoto","Hikone",50,"treno"],["Kyoto","Tsuruga",55,"treno espresso"],["Kyoto","kyoto_early",20,"metro o bus"],["Kyoto","kyoto_late",25,"bus"],["Kyoto","yoshino_shimo",125,"treno Kintetsu"],["Kyoto","kaizu",80,"treno + bus"],
+["Osaka","Kobe",15,"shinkansen"],["Osaka","Wakayama",60,"treno"],["Osaka","mint",15,"metro"],["Osaka","yoshino_shimo",85,"treno Kintetsu"],["Osaka","Okayama",45,"shinkansen"],["Osaka","Nara",40,"treno"],
+["Kobe","himeji",20,"shinkansen"],["himeji","Okayama",25,"shinkansen"],
+["Nara","yoshino_shimo",90,"treno Kintetsu"],["Nara","matabei",60,"auto"],["yoshino_shimo","matabei",50,"auto"],
+["yoshino_shimo","yoshino_naka",15,"bus o a piedi"],["yoshino_naka","yoshino_kami",15,"bus o a piedi"],["yoshino_kami","yoshino_oku",20,"bus o a piedi"],
+["Hikone","kaizu",60,"treno"],["Hikone","Tsuruga",45,"treno espresso"],["kaizu","Tsuruga",35,"treno"],
+["Tsuruga","Fukui",20,"shinkansen"],["Fukui","Kanazawa",20,"shinkansen"],["Kanazawa","Toyama",22,"shinkansen"],["Toyama","Joetsu",35,"shinkansen"],["Joetsu","Nagano",15,"shinkansen"],["Joetsu","takada",15,"treno locale"],
+["Nagano","matsumoto",55,"treno"],["matsumoto","takato",80,"auto"],
+["Okayama","Fukuyama",20,"shinkansen"],["Fukuyama","Hiroshima",25,"shinkansen"],["Fukuyama","onomichi",20,"treno"],["Okayama","tsuyama",70,"treno"],["Okayama","Takamatsu",55,"treno"],["Okayama","Matsuyama",165,"treno espresso"],["Okayama","Kochi",150,"treno espresso"],["Okayama","Matsue",160,"treno espresso"],["Okayama","Tottori",115,"treno espresso"],["Takamatsu","Tokushima",70,"treno espresso"],
+["Hiroshima","Fukuoka",65,"shinkansen"],["Fukuoka","Kumamoto",35,"shinkansen"],["Kumamoto","Kagoshima",45,"shinkansen"],["Fukuoka","Nagasaki",85,"treno + shinkansen"],["Fukuoka","akizuki",80,"treno + bus"],
+["Koriyama","Fukushima",15,"shinkansen"],["Koriyama","miharu",40,"auto o bus"],["Fukushima","hanamiyama",20,"bus"],["Fukushima","shiroishi",30,"shinkansen + treno"],["Fukushima","Sendai",25,"shinkansen"],["Fukushima","Yamagata",65,"shinkansen"],["shiroishi","Sendai",25,"treno"],
+["Sendai","Morioka",40,"shinkansen"],["Morioka","kitakami",35,"shinkansen + bus"],["Morioka","kakunodate",50,"shinkansen"],["kakunodate","Akita",45,"shinkansen"],["Morioka","Aomori",60,"shinkansen"],["Aomori","hirosaki",45,"treno"],["Aomori","Hakodate",80,"shinkansen"],["Hakodate","Sapporo",225,"treno espresso"]];
+const ADJ={};EDGES.forEach(([a,b,t,m])=>{(ADJ[a]=ADJ[a]||[]).push([b,t,m]);(ADJ[b]=ADJ[b]||[]).push([a,t,m])});
+const nodeName=id=>HUBNAME[id]||(byId(id)?byId(id).name:id);
+const RCACHE={};
+function route(a,b){ // Dijkstra, cambio di mezzo +15 min
+  if(a===b)return{t:0,legs:[]};const key=a+">"+b;if(RCACHE[key])return RCACHE[key];
+  const dist={[a+"|"]:0},prev={},pq=[[0,a,""]],done=new Set();
+  while(pq.length){pq.sort((x,y)=>x[0]-y[0]);const [d,n,m]=pq.shift();const k=n+"|"+m;if(done.has(k))continue;done.add(k);
+    if(n===b){const legs=[];let c=k;while(prev[c]){const [pk2,leg]=prev[c];legs.unshift(leg);c=pk2}const r={t:d,legs};RCACHE[key]=r;return r}
+    for(const [nb,t,mode] of ADJ[n]||[]){const pen=m&&m!==mode?15:0;const nd=d+t+pen,nk=nb+"|"+mode;if(dist[nk]===undefined||nd<dist[nk]){dist[nk]=nd;prev[nk]=[k,{from:n,to:nb,t,mode}];pq.push([nd,nb,mode])}}}
+  return RCACHE[key]={t:null,legs:[]};
+}
+const hm=t=>{t=Math.round(t/5)*5;const h=Math.floor(t/60),m=t%60;return h?`${h}h${m?String(m).padStart(2,"0"):""}`:`${m} min`};
+function legsTxt(r){const g=[];r.legs.forEach(l=>{const last=g[g.length-1];if(last&&last.mode===l.mode){last.to=l.to;last.t+=l.t}else g.push({...l})});return g.length?nodeName(g[0].from)+" → "+g.map(l=>`${nodeName(l.to)} (${l.mode})`).join(" → "):""}
+const needsCar=r=>r.legs.some(l=>/auto/.test(l.mode));
+
 /* ---------- pianificatore ---------- */
 const PRESETS={
  now:[["Tokyo",2,[]],["Kyoto",3,["kyoto_early","Osaka","Kobe"]],["yoshino_naka",2,["yoshino_shimo","yoshino_kami"]],["Kanazawa",3,["kaizu","takada"]],["chureito",1,[]],["Tokyo",2,[]]],
@@ -529,16 +574,17 @@ const PRESETS={
  B:[["Tokyo",2,[]],["Kyoto",3,["kyoto_early","Osaka"]],["matsumoto",2,["takato"]],["Fukushima",3,["hanamiyama","miharu","shiroishi"]],["Tokyo",3,["chureito"]]],
  C:[["Tokyo",2,[]],["onomichi",2,[]],["tsuyama",1,[]],["Kyoto",3,["himeji","kyoto_late"]],["yoshino_naka",1,["yoshino_kami"]],["Nara",1,["matabei"]],["Tokyo",3,["chureito"]]],
  empty:[]};
-let plan=[],pbasis="p10";
+const PRESET_NAME={now:"Struttura attuale",A:"Bozza A",B:"Bozza B",C:"Bozza C"};
+let plan=[],pbasis="p10",variants=[];
 const TOTAL=T1-T0;
 function loadPreset(k){plan=PRESETS[k].map(([id,n,ex])=>({id,n,ex:[...ex]}));$("#preset").value=k;savePlan();drawPlan()}
-function enc(){return plan.map(s=>[s.id,s.n,s.ex.join(",")].join(":")).join("|")}
+function enc(pl=plan){return pl.map(s=>[s.id,s.n,s.ex.join(",")].join(":")).join("|")}
 function dec(str){return str.split("|").filter(Boolean).map(t=>{const [id,n,ex]=t.split(":");return{id,n:Math.max(1,+n||1),ex:(ex||"").split(",").filter(e=>byId(e))}}).filter(s=>byId(s.id))}
-function savePlan(){try{localStorage.setItem("hanami_plan_v1",JSON.stringify({p:enc(),b:pbasis}))}catch(e){}try{history.replaceState(null,"","#piano="+encodeURIComponent(enc()))}catch(e){}}
+function savePlan(){try{localStorage.setItem("hanami_plan_v1",JSON.stringify({p:enc(),b:pbasis,v:variants}))}catch(e){}try{history.replaceState(null,"","#piano="+encodeURIComponent(enc()))}catch(e){}}
 function initPlan(){
   let s=null;const m=location.hash.match(/piano=([^&]+)/);
+  try{const o=JSON.parse(localStorage.getItem("hanami_plan_v1")||"null");if(o){if(!m)s=dec(o.p);pbasis=o.b||"p10";variants=o.v||[]}}catch(e){}
   if(m){try{s=dec(decodeURIComponent(m[1]))}catch(e){}}
-  if(!s){try{const o=JSON.parse(localStorage.getItem("hanami_plan_v1")||"null");if(o){s=dec(o.p);pbasis=o.b||"p10"}}catch(e){}}
   if(s&&s.length)plan=s;else loadPreset("now");
   $("#pbasis").value=pbasis;
 }
@@ -546,35 +592,51 @@ placeOptions($("#addPlace"));$("#addPlace").value="Kyoto";
 $("#addBtn").onclick=()=>{plan.push({id:$("#addPlace").value,n:Math.max(1,Math.min(13,+$("#addN").value||1)),ex:[]});$("#preset").value="";savePlan();drawPlan()};
 $("#preset").onchange=e=>{if(e.target.value)loadPreset(e.target.value)};
 $("#pbasis").onchange=e=>{pbasis=e.target.value;savePlan();drawPlan()};
-$("#share").onclick=async()=>{const url=location.href.split("#")[0]+"#piano="+encodeURIComponent(enc());try{await navigator.clipboard.writeText(url);$("#share").textContent="Link copiato ✓"}catch(e){prompt("Copia questo link:",url)}setTimeout(()=>$("#share").textContent="Copia link del piano",2200)};
+function flash(btn,txt){const o=btn.textContent;btn.textContent=txt;setTimeout(()=>btn.textContent=o,2000)}
+async function copyText(t,btn,ok){try{await navigator.clipboard.writeText(t);flash(btn,ok)}catch(e){prompt("Copia da qui:",t)}}
+$("#share").onclick=()=>copyText(location.href.split("#")[0]+"#piano="+encodeURIComponent(enc()),$("#share"),"Link copiato ✓");
 
-function schedule(){ // day -> {i, move}
+function schedule(pl=plan){
   const map={};let cur=T0;
-  plan.forEach((s,i)=>{for(let j=0;j<s.n;j++){if(cur+j<=T1)map[cur+j]={i,move:j===0&&i>0}}cur+=s.n});
-  const nights=plan.reduce((a,s)=>a+s.n,0);
-  if(plan.length&&nights<=TOTAL){map[T0+nights]={i:plan.length-1,move:false,dep:true,last:true}}
+  pl.forEach((s,i)=>{for(let j=0;j<s.n;j++){if(cur+j<=T1)map[cur+j]={i,move:j===0&&i>0}}cur+=s.n});
+  const nights=pl.reduce((a,s)=>a+s.n,0);
+  if(pl.length&&nights<=TOTAL)map[T0+nights]={i:pl.length-1,move:false,dep:true};
   return{map,nights};
 }
 const placesOf=s=>[s.id,...s.ex];
-function dayEval(ids,d){
+function dayEval(ids,d,basis=pbasis){
   const ps=ids.map(byId);
-  if(pbasis==="est"){const st=ps.map(p=>{const e=estD(p);return{p,s:stOf(e.m,e.k,d)}});const rank={peak:0,open:1,fall:2,pre:3,leaf:4};st.sort((a,b)=>rank[a.s]-rank[b.s]);return{single:true,best:st[0].p,s:st[0].s,peak:st[0].s==="peak"?1:0,vis:["peak","open","fall"].includes(st[0].s)?1:0}}
-  const ix=pbasis==="p16"?IX16:IX10;
+  if(basis==="est"){const st=ps.map(p=>{const e=estD(p);return{p,s:stOf(e.m,e.k,d)}});const rank={peak:0,open:1,fall:2,pre:3,leaf:4};st.sort((a,b)=>rank[a.s]-rank[b.s]);return{single:true,best:st[0].p,s:st[0].s,peak:st[0].s==="peak"?1:0,vis:["peak","open","fall"].includes(st[0].s)?1:0}}
+  const ix=basis==="p16"?IX16:IX10;
   const peak=ix.filter(i=>ps.some(p=>p.m[i]-2<=d&&d<=p.m[i]+4)).length/ix.length;
   const vis=ix.filter(i=>ps.some(p=>p.k[i]<=d&&d<=p.m[i]+8)).length/ix.length;
   const best=ps.slice().sort((a,b)=>pk(b,d,ix)-pk(a,d,ix)||vs(b,d,ix)-vs(a,d,ix))[0];
   return{peak,vis,best,N:ix.length};
 }
+function evaluate(pl,basis=pbasis){
+  const {map,nights}=schedule(pl);const days=[];
+  for(let d=T0;d<=T1;d++){const e=map[d];if(!e){days.push({d});continue}
+    const s=pl[e.i];let ids=placesOf(s);if(e.move)ids=[...new Set([...placesOf(pl[e.i-1]),...ids])];
+    days.push({d,e,s,ids,ev:dayEval(ids,d,basis)})}
+  const filled=days.filter(x=>x.ev);
+  const transfers=pl.slice(1).map((s,i)=>route(pl[i].id,s.id));
+  const travel=transfers.reduce((a,r)=>a+(r.t||0),0);
+  const trips=pl.reduce((a,s)=>a+s.ex.reduce((b,e)=>b+2*(route(s.id,e).t||0),0),0);
+  return{days,filled,nights,transfers,travel,trips,
+    peak:filled.reduce((a,x)=>a+x.ev.peak,0),vis:filled.reduce((a,x)=>a+x.ev.vis,0),strong:filled.filter(x=>x.ev.peak>=.5).length,
+    moves:Math.max(0,pl.length-1),car:pl.some((s,i)=>(i&&needsCar(transfers[i-1]))||s.ex.some(e=>needsCar(route(s.id,e))))};
+}
 function drawPlan(){
-  const {map,nights}=schedule();
+  const R=evaluate(plan),single=pbasis==="est";
   // tappe
   let cur=T0;
   $("#stops").innerHTML=plan.map((s,i)=>{const p=byId(s.id);const a=cur,b=cur+s.n;cur=b;
-    const exSel=`<select data-ex="${i}" aria-label="Aggiungi gita da ${p.name}" style="min-width:0;flex:1;min-height:36px;font-size:14px"><option value="">+ gita in giornata…</option>${REG_ORDER.map(r=>{const g=P.filter(q=>q.region===r&&q.id!==s.id&&!s.ex.includes(q.id)).sort((x,y)=>mean(x.m)-mean(y.m));return g.length?`<optgroup label="${r}">${g.map(q=>`<option value="${q.id}">${q.name}</option>`).join("")}</optgroup>`:""}).join("")}</select>`;
-    return `<li class="stop"><div class="row1"><div><div class="ttl">${i+1}. ${p.name}</div><div class="when">${a<=T1?`dal ${fmt(a)} al ${fmt(b)}`:"oltre la fine del viaggio"}</div></div>
+    let tr="";if(i){const r=R.transfers[i-1];tr=`<li class="transfer">${r.t==null?"Percorso non disponibile":`<b>${hm(r.t)}</b> · ${legsTxt(r)}${r.t>=240?' <span class="warn">trasferimento lungo</span>':""}${needsCar(r)?' <span class="warn">serve l\'auto</span>':""}`}</li>`}
+    const exSel=`<select data-ex="${i}" aria-label="Aggiungi gita da ${p.name}" style="min-width:0;flex:1;min-height:36px;font-size:14px"><option value="">+ gita in giornata…</option>${REG_ORDER.map(r=>{const g=P.filter(q=>q.region===r&&q.id!==s.id&&!s.ex.includes(q.id)).map(q=>({q,t:route(s.id,q.id).t})).filter(o=>o.t!=null&&o.t<=180).sort((x,y)=>x.t-y.t);return g.length?`<optgroup label="${r}">${g.map(o=>`<option value="${o.q.id}">${o.q.name} · ${hm(o.t)}</option>`).join("")}</optgroup>`:""}).join("")}</select>`;
+    return tr+`<li class="stop"><div class="row1"><div><div class="ttl">${i+1}. ${p.name}</div><div class="when">${a<=T1?`dal ${fmt(a)} al ${fmt(b)}`:"oltre la fine del viaggio"}</div></div>
       <div style="display:flex;gap:4px"><button class="btn sm" data-up="${i}" aria-label="Sposta su" ${i?"":"disabled"}>↑</button><button class="btn sm" data-dn="${i}" aria-label="Sposta giù" ${i<plan.length-1?"":"disabled"}>↓</button><button class="btn sm" data-rm="${i}" aria-label="Rimuovi ${p.name}">✕</button></div></div>
       <div class="ctrls"><span class="nights"><button data-nm="${i}" aria-label="Una notte in meno">−</button><span>${s.n} ${s.n===1?"notte":"notti"}</span><button data-np="${i}" aria-label="Una notte in più">+</button></span>${exSel}</div>
-      ${s.ex.length?`<div class="chips">${s.ex.map(e=>`<span class="chip">${byId(e).name}<button data-rx="${i}:${e}" aria-label="Togli gita">✕</button></span>`).join("")}</div>`:""}</li>`}).join("")||`<li class="stop">Nessuna tappa. Parti da una bozza o aggiungi un luogo qui sotto.</li>`;
+      ${s.ex.length?`<div class="chips">${s.ex.map(e=>{const r=route(s.id,e);return `<span class="chip">${byId(e).name} · ${r.t==null?"?":hm(r.t)}${needsCar(r)?" · auto":""}<button data-rx="${i}:${e}" aria-label="Togli gita">✕</button></span>`}).join("")}</div>`:""}</li>`}).join("")||`<li class="stop">Nessuna tappa. Parti da una bozza o aggiungi un luogo qui sotto.</li>`;
   const st=$("#stops");
   st.querySelectorAll("[data-up]").forEach(b=>b.onclick=()=>{const i=+b.dataset.up;[plan[i-1],plan[i]]=[plan[i],plan[i-1]];upd()});
   st.querySelectorAll("[data-dn]").forEach(b=>b.onclick=()=>{const i=+b.dataset.dn;[plan[i+1],plan[i]]=[plan[i],plan[i+1]];upd()});
@@ -583,51 +645,68 @@ function drawPlan(){
   st.querySelectorAll("[data-np]").forEach(b=>b.onclick=()=>{plan[+b.dataset.np].n++;upd()});
   st.querySelectorAll("[data-ex]").forEach(sel=>sel.onchange=()=>{if(sel.value){plan[+sel.dataset.ex].ex.push(sel.value);upd()}});
   st.querySelectorAll("[data-rx]").forEach(b=>b.onclick=()=>{const [i,e]=b.dataset.rx.split(":");plan[+i].ex=plan[+i].ex.filter(x=>x!==e);upd()});
-  const ns=$("#nightsum");ns.className="nightsum "+(nights===TOTAL?"good":"bad");
+  const nights=R.nights,ns=$("#nightsum");ns.className="nightsum "+(nights===TOTAL?"good":"bad");
   ns.textContent=nights===TOTAL?`${nights} notti su ${TOTAL}: il piano copre tutto il viaggio, volo l'11 aprile.`:nights<TOTAL?`${nights} notti su ${TOTAL}: mancano ${TOTAL-nights} ${TOTAL-nights===1?"notte":"notti"}.`:`${nights} notti su ${TOTAL}: ${nights-TOTAL} ${nights-TOTAL===1?"notte":"notti"} di troppo, le ultime escono dal viaggio.`;
 
-  // valutazione
-  const days=[];for(let d=T0;d<=T1;d++){const e=map[d];if(!e){days.push({d});continue}
-    const s=plan[e.i];let ids=placesOf(s);if(e.move)ids=[...new Set([...placesOf(plan[e.i-1]),...ids])];
-    days.push({d,e,s,ids,ev:dayEval(ids,d)})}
-  const filled=days.filter(x=>x.ev);
-  const single=pbasis==="est";
-  const sumPk=filled.reduce((a,x)=>a+x.ev.peak,0),sumVs=filled.reduce((a,x)=>a+x.ev.vis,0);
-  const strong=filled.filter(x=>x.ev.peak>=.5).length;
-  // anni
-  const yr=YEARS.map((y,i)=>filled.filter(x=>x.ids.some(id=>{const p=byId(id);return p.m[i]-2<=x.d&&x.d<=p.m[i]+4})).length);
-  const tok=byId("Tokyo");const kind=i=>tok.m[i]<=24?"precoce":tok.m[i]>=33?"tardiva":"normale";
+  // riepilogo
+  const f=R.filled,mx=Math.max(1,f.length);
+  const yr=YEARS.map((y,i)=>f.filter(x=>x.ids.some(id=>{const p=byId(id);return p.m[i]-2<=x.d&&x.d<=p.m[i]+4})).length);
+  const tok=byId("Tokyo"),kind=i=>tok.m[i]<=24?"precoce":tok.m[i]>=33?"tardiva":"normale";
   const bestY=yr.indexOf(Math.max(...yr)),worstY=yr.indexOf(Math.min(...yr));
-  $("#kpis").innerHTML=single?`<div class="card kpi"><b>${sumPk}</b><span>giorni al picco su ${filled.length}</span></div><div class="card kpi"><b>${sumVs}</b><span>giorni con fiori da vedere</span></div><div class="card kpi"><b>${plan.length}</b><span>tappe, ${Math.max(0,plan.length-1)} ${plan.length===2?"cambio":"cambi"} di hotel</span></div>`
-   :`<div class="card kpi"><b>${sumPk.toFixed(1)}</b><span>giorni al picco attesi, su ${filled.length}</span></div><div class="card kpi"><b>${sumVs.toFixed(1)}</b><span>giorni attesi con fiori da vedere</span></div><div class="card kpi"><b>${strong}</b><span>giorni con picco almeno 5 anni su 10</span></div><div class="card kpi"><b>${Math.max(0,plan.length-1)}</b><span>${plan.length===2?"cambio":"cambi"} di hotel</span></div>`;
-  const mx=Math.max(1,filled.length);
+  const kp=(b,s)=>`<div class="card kpi"><b>${b}</b><span>${s}</span></div>`;
+  $("#kpis").innerHTML=(single?kp(R.peak,`giorni al picco su ${f.length}`)+kp(R.vis,"giorni con fiori da vedere"):kp(R.peak.toFixed(1),`giorni al picco attesi, su ${f.length}`)+kp(R.vis.toFixed(1),"giorni attesi con fiori da vedere")+kp(R.strong,"giorni con picco almeno 5 anni su 10"))
+    +kp(hm(R.travel),`in treno per ${R.moves} ${R.moves===1?"cambio":"cambi"} di hotel`)+kp(hm(R.trips),"per le gite, andata e ritorno");
   $("#yrcard").innerHTML=`<h3>Il piano rifatto negli anni passati</h3><p style="margin:0;color:var(--muted);font-size:14.5px">Giorni al picco che avresti avuto con le date reali di ogni stagione. Migliore: ${YEARS[bestY]} (${yr[bestY]} giorni), peggiore: ${YEARS[worstY]} (${yr[worstY]}).</p><div class="yrs">${yr.map((c,i)=>{const t=c/mx;return `<span title="Stagione ${kind(i)}" style="background:${pcol(t)};color:${pInk(t)}"><b>${c}</b>${YEARS[i]}</span>`}).join("")}</div>
     <p style="margin:8px 0 0;font-size:13.5px;color:var(--muted)">Media anni normali ${avgK(yr,kind,"normale")}, precoci ${avgK(yr,kind,"precoce")}, tardivi ${avgK(yr,kind,"tardiva")}. Precoce = Tokyo al picco entro il 24 marzo, tardiva = dal 2 aprile.</p>`;
   // timeline
-  $("#tl").innerHTML=days.map(x=>{const lab=`<div class="dt">${fmt(x.d)}<small>${WDL[wday(x.d)]}</small></div>`;
+  $("#tl").innerHTML=R.days.map(x=>{const lab=`<div class="dt">${fmt(x.d)}<small>${WDL[wday(x.d)]}</small></div>`;
     if(!x.ev)return `<div class="tlrow">${lab}<div class="pl"><span class="nm" style="color:var(--muted)">Nessuna tappa per questo giorno</span></div><div class="val"></div></div>`;
     const p=byId(x.s.id),prev=x.e.move?byId(plan[x.e.i-1].id):null;
-    const where=x.e.dep?`Partenza da ${p.name}`:x.e.move?`${prev.name} → ${p.name}`:p.name;
-    const bestTxt=x.ev.best.id!==x.s.id||x.e.move?`<div class="ex">Meglio quel giorno: ${x.ev.best.name}</div>`:"";
+    const where=x.e.dep?`Partenza da ${p.name} · volo da Haneda`:x.e.move?`${prev.name} → ${p.name}`:p.name;
+    const tr=x.e.move?R.transfers[x.e.i-1]:null;
+    const trTxt=tr&&tr.t!=null?`<div class="ex">In viaggio ${hm(tr.t)} · ${legsTxt(tr)}</div>`:"";
+    const bestTxt=x.ev.best.id!==x.s.id||x.e.move?`<div class="ex">Meglio quel giorno: ${x.ev.best.name}${x.ev.best.id!==x.s.id&&!x.e.move?` (${hm(route(x.s.id,x.ev.best.id).t||0)} da ${p.name})`:""}</div>`:"";
     let val,bar="";
-    if(single){val=`<span class="state" style="background:var(${ST[x.ev.s][1]})">${ST[x.ev.s][0]}</span>`}
+    if(single)val=`<span class="state" style="background:var(${ST[x.ev.s][1]})">${ST[x.ev.s][0]}</span>`;
     else{const N=x.ev.N;val=`<b>${Math.round(x.ev.peak*N)} su ${N}</b>al picco · fiorito ${Math.round(x.ev.vis*N)}`;bar=`<div class="tlbar" aria-hidden="true"><i style="width:${x.ev.peak*100}%;background:var(--peak)"></i><i style="width:${(x.ev.vis-x.ev.peak)*100}%;background:var(--open)"></i></div>`}
-    return `<div class="tlrow${x.e.move?" move":""}">${lab}<div class="pl"><div class="nm">${where}</div>${bestTxt}${bar}</div><div class="val">${val}</div></div>`}).join("");
+    return `<div class="tlrow${x.e.move?" move":""}">${lab}<div class="pl"><div class="nm">${where}</div>${trTxt}${bestTxt}${bar}</div><div class="val">${val}</div></div>`}).join("");
   // suggerimenti
   const tips=[];let c2=T0;const ix=pbasis==="p16"?IX16:IX10;
-  plan.forEach((s,i)=>{const start=c2;c2+=s.n;const ids=placesOf(s);const ps=ids.map(byId);
+  plan.forEach((s,i)=>{const start=c2;c2+=s.n;if(start>T1)return;const ps=placesOf(s).map(byId);const name=byId(s.id).name;
+    if(i>0){const r=R.transfers[i-1];if(r.t>=240)tips.push(`Il trasferimento verso <b>${name}</b> dura circa ${hm(r.t)}: quel giorno resta poco tempo per l'hanami. Valuta una tappa intermedia o un ordine diverso.`)}
+    s.ex.forEach(e=>{const r=route(s.id,e);if(r.t>=120)tips.push(`La gita a <b>${byId(e).name}</b> da ${name} richiede circa ${hm(r.t)} per tratta: meglio dormirci o spostare la base.`)});
     if(ps.every(p=>p.id==="Tokyo")&&i>0)return;
     const score=a=>{let t=0;for(let d=a;d<a+s.n&&d<=T1;d++)t+=ix.filter(y=>ps.some(p=>p.m[y]-2<=d&&d<=p.m[y]+4)).length/ix.length;return t};
     const now=score(start);let bs=start,bv=now;for(let a=T0;a+s.n-1<=T1;a++){const v=score(a);if(v>bv+.001){bv=v;bs=a}}
-    const name=byId(s.id).name;
-    if(start>T1)return;
-    if(now<.3*s.n&&bv-now>=.6)tips.push(`<b>${name}</b> nei tuoi giorni è poco probabile al picco. Renderebbe di più arrivando il ${fmt(bs)} (circa ${(bv-now).toFixed(1)} giorni al picco in più).`);
-    else if(bv-now>=.8)tips.push(`<b>${name}</b> andrebbe meglio arrivando il ${fmt(bs)}: circa ${(bv-now).toFixed(1)} giorni al picco in più.`);
+    if(!single&&now<.3*s.n&&bv-now>=.6)tips.push(`<b>${name}</b> nei tuoi giorni è poco probabile al picco. Renderebbe di più arrivando il ${fmt(bs)} (circa ${(bv-now).toFixed(1)} giorni al picco in più).`);
+    else if(!single&&bv-now>=.8)tips.push(`<b>${name}</b> andrebbe meglio arrivando il ${fmt(bs)}: circa ${(bv-now).toFixed(1)} giorni al picco in più.`);
   });
-  $("#ptips").innerHTML=`<h3>Suggerimenti</h3>${tips.length?`<ul style="margin:0;padding-left:20px">${tips.map(t=>`<li>${t}</li>`).join("")}</ul>`:`<p style="margin:0;color:var(--muted)">Ogni tappa cade già nei giorni in cui rende di più, o quasi.</p>`}<p style="margin:10px 0 0;font-size:13.5px;color:var(--muted)">I tempi di viaggio tra le tappe non sono calcolati: considera mezza giornata nei giorni di trasferimento (bordo tratteggiato).</p>`;
+  if(R.car)tips.push(`Alcune tappe o gite richiedono l'auto (o taxi e bus locali poco frequenti). Serve il permesso di guida internazionale.`);
+  $("#ptips").innerHTML=`<h3>Suggerimenti</h3>${tips.length?`<ul style="margin:0;padding-left:20px">${tips.map(t=>`<li>${t}</li>`).join("")}</ul>`:`<p style="margin:0;color:var(--muted)">Nessun problema evidente: ogni tappa cade nei giorni in cui rende di più, o quasi.</p>`}<p style="margin:10px 0 0;font-size:13.5px;color:var(--muted)">Tempi di treno indicativi, porta a porta aggiungi 30–60 minuti. Da verificare con Japan Transit Planner o Google Maps prima di prenotare.</p>`;
+  drawVariants();
 }
 function avgK(yr,kind,k){const a=yr.filter((_,i)=>kind(i)===k);return a.length?(a.reduce((s,x)=>s+x,0)/a.length).toFixed(1):"–"}
 function upd(){$("#preset").value="";savePlan();drawPlan()}
+
+/* varianti e testo */
+function drawVariants(){
+  const rows=[{name:"Piano attuale",p:enc(),cur:true},...variants];
+  $("#variants").innerHTML=`<h3>Confronta varianti</h3><p style="margin:0 0 10px;color:var(--muted);font-size:14.5px">Salva il piano attuale come variante, poi modificalo: qui vedi i numeri affiancati.</p>
+  <div class="scroll" style="border:0"><table class="cmp"><thead><tr><th>Variante</th><th>Picco</th><th>Fiori</th><th>Treno</th><th>Gite</th><th>Hotel</th><th></th></tr></thead><tbody>${rows.map((v,i)=>{const pl=dec(v.p),R=evaluate(pl,pbasis==="est"?"p10":pbasis);return `<tr${v.cur?' class="cur"':""}><td>${v.name}<span class="mini">${pl.map(s=>byId(s.id).name.split(/[ ,(]/)[0]).join(" → ")}</span></td><td><b>${R.peak.toFixed(1)}</b></td><td>${R.vis.toFixed(1)}</td><td>${hm(R.travel)}</td><td>${hm(R.trips)}</td><td>${R.moves}</td><td>${v.cur?"":`<button class="btn sm" data-vl="${i-1}">Apri</button> <button class="btn sm" data-vd="${i-1}" aria-label="Elimina variante">✕</button>`}</td></tr>`}).join("")}</tbody></table></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="btn" id="vsave" type="button">Salva come variante</button><button class="btn" id="copyTxt" type="button">Copia itinerario come testo</button></div>`;
+  $("#vsave").onclick=()=>{const n=prompt("Nome della variante:",`Variante ${variants.length+1}`);if(n===null)return;variants.push({name:n.trim()||`Variante ${variants.length+1}`,p:enc()});savePlan();drawVariants()};
+  $("#variants").querySelectorAll("[data-vl]").forEach(b=>b.onclick=()=>{plan=dec(variants[+b.dataset.vl].p);upd()});
+  $("#variants").querySelectorAll("[data-vd]").forEach(b=>b.onclick=()=>{variants.splice(+b.dataset.vd,1);savePlan();drawVariants()});
+  $("#copyTxt").onclick=()=>copyText(planText(),$("#copyTxt"),"Copiato ✓");
+}
+function planText(){
+  const R=evaluate(plan);const N=pbasis==="p16"?16:10;const L=[`Hanami 2027 · 29 marzo – 11 aprile`,""];
+  R.days.forEach(x=>{if(!x.ev)return;const p=byId(x.s.id);let line=`${WD[wday(x.d)]} ${fmt(x.d)} · `;
+    if(x.e.dep)line+=`Partenza da ${p.name}`;else if(x.e.move){const r=R.transfers[x.e.i-1];line+=`${byId(plan[x.e.i-1].id).name} → ${p.name} (${hm(r.t||0)}: ${legsTxt(r)})`}else line+=p.name;
+    if(x.s.ex.length&&!x.e.dep)line+=` · gite: ${x.s.ex.map(e=>byId(e).name).join(", ")}`;
+    if(!x.ev.single)line+=` · picco ${Math.round(x.ev.peak*N)}/${N}`;L.push(line)});
+  L.push("",`Giorni al picco attesi: ${R.peak.toFixed(1)} · treno: ${hm(R.travel)}`);return L.join("\n");
+}
 
 /* ---------- eventi ---------- */
 function drawDay(){drawMap();drawRank();drawGantt()}
